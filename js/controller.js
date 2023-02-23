@@ -144,6 +144,28 @@ function setBatterStrike(strikeCount){
     $("#strike3").attr("fill-opacity", 0.8);
   }
 }
+function setBatterOuts(outCount){
+  if(outCount == 0){
+    $("#outs1").attr("fill-opacity", 0.2);
+    $("#outs2").attr("fill-opacity", 0.2);
+    $("#outs3").attr("fill-opacity", 0.2);
+  }
+  if(outCount == 1){
+    $("#outs1").attr("fill-opacity", 0.8);
+    $("#outs2").attr("fill-opacity", 0.2);
+    $("#outs3").attr("fill-opacity", 0.2);
+  }
+  if(outCount == 2){
+    $("#outs1").attr("fill-opacity", 0.8);
+    $("#outs2").attr("fill-opacity", 0.8);
+    $("#outs3").attr("fill-opacity", 0.2);
+  }
+  if(outCount == 3){
+    $("#outs1").attr("fill-opacity", 0.8);
+    $("#outs2").attr("fill-opacity", 0.8);
+    $("#outs3").attr("fill-opacity", 0.8);
+  }
+}
 var dob = 0;
 var gameState = new Array();
 var gameType = new Array();
