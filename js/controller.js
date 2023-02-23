@@ -127,12 +127,15 @@ function handleEventData(data) {
     }
     document.getElementById("headerHome").textContent = teamNames["home"];
     document.getElementById("headerAway").textContent = teamNames["away"];
+    document.getElementById("homeMember").textContent = teamNames["home"];
+    document.getElementById("awayMember").textContent = teamNames["away"];
 
     // Score Setting
     var result = match["result"];
     if (result["home"] > -1) homeScore = result["home"];
     if (result["away"] > -1) awayScore = result["away"];
     $("#score").text(homeScore + " - " + awayScore);
+    $("#period").text(match["status"]["name"]);
     if (match["status"]["name"] == "Ended") {
       setCenterFrame("Match End", homeScore + " : " + awayScore);
       $("#period").text("Ended");
@@ -197,8 +200,8 @@ function handleInfoData(data) {
   awayPlayerColor = jerseys["away"]["player"]["base"];
   // homePlayerColor = jerseys["home"]["player"]["sleeve"];
   // awayPlayerColor = jerseys["away"]["player"]["sleeve"];
-  $("#pitcherbox").attr("fill", "#" + homePlayerColor);
-  $("#batterbox").attr("fill", "#" + awayPlayerColor);
+  $("#homerbox").attr("fill", "#" + homePlayerColor);
+  $("#awaybox").attr("fill", "#" + awayPlayerColor);
 }
 function changeScreenSize() {
   screenHeight = window.innerHeight;
