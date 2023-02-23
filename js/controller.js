@@ -88,6 +88,19 @@ function stepInitialize() {
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
 }
+function setBase(baseNumber, baseMember) {
+  if (baseMember) {
+    $("#base" + baseNumber).attr("fill-opacity", "0.8");
+    $("#base" + baseNumber + "Number").attr("fill-opacity", "0.8");
+    $("#base" + baseNumber + "Member").text(baseMember);
+  }
+  else {
+    $("#base" + baseNumber).attr("fill-opacity", "0.2");
+    $("#base" + baseNumber + "Number").attr("fill-opacity", "0.5");
+    $("#base" + baseNumber + "Member").text("");
+  }
+
+}
 var dob = 0;
 var gameState = new Array();
 var gameType = new Array();
@@ -220,6 +233,6 @@ function min(a, b) {
   if (a > b) return b;
   return a;
 }
-function arrangeScoreTable(){
+function arrangeScoreTable() {
   $("#homePeriodScore").append('<text font-size="12" x="0" y="0" text-anchor="middle" fill="#fff">11</text>')
 }
