@@ -44,6 +44,7 @@ function load() {
       handleEventData(data.d);
     }
   };
+  arrangeScoreTable();
 }
 function max(a, b) {
   if (a > b) return a;
@@ -218,4 +219,7 @@ function changeScreenSize() {
 function min(a, b) {
   if (a > b) return b;
   return a;
+}
+function arrangeScoreTable(){
+  $("#homePeriodScore").append('<text font-size="12" x="0" y="0" text-anchor="middle" fill="#fff">11</text>')
 }
