@@ -1,0 +1,48 @@
+match
+p:
+	101: 1st inning
+	102: 2nd inning
+	31: 1st break
+livestate->batter->team: batting team
+periods: p1, p2, latest period score should be calculated by total score - period scores.
+numberofperiods: 9
+result: total score
+status->name: current state ("2nd inning:)
+teams->home
+
+
+
+
+events
+type:"play_start_baseball"
+
+type: "ball"
+	batter_count->balls, strikes, outs, pcount, errors
+type: "strike"
+	batter_count->balls, strikes, outs, pcount, errors
+type: "runner_checked"
+type: "ball_in_play"				this time field image shown,
+	ball->angle, direction, distance, speed_mph, x, y
+type: "batter out"
+
+type: "play_over_baseball"
+	away->hits, errors
+	
+	bases->1->occurpied: true or false
+	bases->2->occurpied: true or false
+	bases->3->occurpied: true or false
+	
+	home->hits, errors
+
+type: "periodscore"
+
+type: "batter_advances_to_base_x" (this event come after "ball")
+	runner->starting_base, ending_base
+	base_loadout->1,2,3
+	advancement_type: "walk", "single", "double"
+
+type: "run_scored"
+	base_loadout: all is false, this time, every batters in play go home base.
+	name: "Run scored"
+	run_type: "home_run"
+type: "half_inning_start"		this time MIDDLE OF THE INNING
