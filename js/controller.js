@@ -99,7 +99,28 @@ function setBase(baseNumber, baseMember) {
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.5");
     $("#base" + baseNumber + "Member").text("");
   }
-
+}
+function setBatterBall(ballCount){
+  if(ballCount == 0){
+    $("#ball1").attr("fill-opacity", 0.2);
+    $("#ball2").attr("fill-opacity", 0.2);
+    $("#ball3").attr("fill-opacity", 0.2);
+  }
+  if(ballCount == 1){
+    $("#ball1").attr("fill-opacity", 0.8);
+    $("#ball2").attr("fill-opacity", 0.2);
+    $("#ball3").attr("fill-opacity", 0.2);
+  }
+  if(ballCount == 2){
+    $("#ball1").attr("fill-opacity", 0.8);
+    $("#ball2").attr("fill-opacity", 0.8);
+    $("#ball3").attr("fill-opacity", 0.2);
+  }
+  if(ballCount == 3){
+    $("#ball1").attr("fill-opacity", 0.8);
+    $("#ball2").attr("fill-opacity", 0.8);
+    $("#ball3").attr("fill-opacity", 0.8);
+  }
 }
 var dob = 0;
 var gameState = new Array();
