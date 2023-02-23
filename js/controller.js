@@ -122,6 +122,28 @@ function setBatterBall(ballCount){
     $("#ball3").attr("fill-opacity", 0.8);
   }
 }
+function setBatterStrike(strikeCount){
+  if(strikeCount == 0){
+    $("#strike1").attr("fill-opacity", 0.2);
+    $("#strike2").attr("fill-opacity", 0.2);
+    $("#strike3").attr("fill-opacity", 0.2);
+  }
+  if(strikeCount == 1){
+    $("#strike1").attr("fill-opacity", 0.8);
+    $("#strike2").attr("fill-opacity", 0.2);
+    $("#strike3").attr("fill-opacity", 0.2);
+  }
+  if(strikeCount == 2){
+    $("#strike1").attr("fill-opacity", 0.8);
+    $("#strike2").attr("fill-opacity", 0.8);
+    $("#strike3").attr("fill-opacity", 0.2);
+  }
+  if(strikeCount == 3){
+    $("#strike1").attr("fill-opacity", 0.8);
+    $("#strike2").attr("fill-opacity", 0.8);
+    $("#strike3").attr("fill-opacity", 0.8);
+  }
+}
 var dob = 0;
 var gameState = new Array();
 var gameType = new Array();
