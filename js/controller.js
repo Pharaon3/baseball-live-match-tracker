@@ -11,6 +11,7 @@ var bestofsets;
 var totalBattingNumber;
 var battingState = new Array();
 var curBat, curPit;
+var tAbbr = new Array();
 
 function countdown() {
   var interval = setInterval(function () {
@@ -97,7 +98,7 @@ function stepInitialize() {
     if(cs["bases"]){
       for(let i = 1; i < 4; i ++){
         if(cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
-        else if(cs["bases"]["" + i]["player_id"] == null) setBase(i, teamNames[curBat]);
+        else if(cs["bases"]["" + i]["player_id"] == null) setBase(i, tAbbr[curBat]);
         else setBase(i, cs["bases"]["" + i]["player_id"]);
       }
     }
@@ -238,6 +239,8 @@ function handleEventData(data) {
     if (awayteam["name"]) awayteamname = awayteam["name"];
     teamNames["home"] = hometeamname;
     teamNames["away"] = awayteamname;
+    tAbbr["home"] = match["teams"]["home"]["abbr"];
+    tAbbr["away"] = match["teams"]["away"]["abbr"];
     // hometeamname = 'This team name is longer than 19 characters'
 
     if (hometeamname.length > 15) {
