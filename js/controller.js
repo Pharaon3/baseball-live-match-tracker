@@ -109,6 +109,8 @@ function stepInitialize() {
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
   }
+  if(cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
+  if(cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
