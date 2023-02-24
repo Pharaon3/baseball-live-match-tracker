@@ -104,7 +104,11 @@ function stepInitialize() {
     }
   }
   if(cs["type"] == "play_start_baseball"){}
-  
+  if(cs["batter_count"]){
+    setBatterBall(cs["batter_count"]["balls"]);
+    setBatterStrike(cs["batter_count"]["strikes"]);
+    setBatterOuts(cs["batter_count"]["outs"]);
+  }
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
