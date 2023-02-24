@@ -96,6 +96,9 @@ function stepInitialize() {
   if(cs["type"] == "play_start_baseball"){}
   if(cs["type"] == "play_over_baseball"){
     if(cs["bases"]){
+      if(cs["bases"]['1']["occupied"]){
+        resetBattingState();
+      }
       for(let i = 1; i < 4; i ++){
         if(cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
         else if(cs["bases"]["" + i]["player_id"] == null) setBase(i, tAbbr[curBat]);
@@ -210,6 +213,12 @@ function setBattingState() {
   for (let i = totalBattingNumber + 1; i <= 20; i++) {
     $("#overNumber" + i).text('');
     $("#overState" + i).text('');
+  }
+}
+function resetBattingState(){
+  for(let i = 0; i < 20; i ++){
+    battingState[i] = ''
+    totalBattingNumber = 1;
   }
 }
 function setScoreTable(where, who, how){
