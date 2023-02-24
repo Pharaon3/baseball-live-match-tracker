@@ -244,6 +244,8 @@ function handleEventData(data) {
     if (result["home"] > -1) homeScore = result["home"];
     if (result["away"] > -1) awayScore = result["away"];
     $("#score").text(homeScore + " - " + awayScore);
+    $("#homeTableR").text(homeScore);
+    $("#awayTableR").text(awayScore);
     // Period Score
     let lastperiodscoreH = homeScore;
     let lastperiodscoreA = awayScore;
