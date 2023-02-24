@@ -8,6 +8,9 @@ var match;
 var innings;
 var bestofsets;
 
+var totalBattingNumber;
+var battingState = new Array();
+
 function countdown() {
   var interval = setInterval(function () {
     changeScreenSize();
@@ -100,70 +103,92 @@ function setBase(baseNumber, baseMember) {
     $("#base" + baseNumber + "Member").text("-");
   }
 }
-function setBatterBall(ballCount){
-  if(ballCount == 0){
+function setBatterBall(ballCount) {
+  if (ballCount == 0) {
     $("#ball1").attr("fill-opacity", 0.2);
     $("#ball2").attr("fill-opacity", 0.2);
     $("#ball3").attr("fill-opacity", 0.2);
   }
-  if(ballCount == 1){
+  if (ballCount == 1) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.2);
     $("#ball3").attr("fill-opacity", 0.2);
   }
-  if(ballCount == 2){
+  if (ballCount == 2) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.8);
     $("#ball3").attr("fill-opacity", 0.2);
   }
-  if(ballCount == 3){
+  if (ballCount == 3) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.8);
     $("#ball3").attr("fill-opacity", 0.8);
   }
 }
-function setBatterStrike(strikeCount){
-  if(strikeCount == 0){
+function setBatterStrike(strikeCount) {
+  if (strikeCount == 0) {
     $("#strike1").attr("fill-opacity", 0.2);
     $("#strike2").attr("fill-opacity", 0.2);
     $("#strike3").attr("fill-opacity", 0.2);
   }
-  if(strikeCount == 1){
+  if (strikeCount == 1) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.2);
     $("#strike3").attr("fill-opacity", 0.2);
   }
-  if(strikeCount == 2){
+  if (strikeCount == 2) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.8);
     $("#strike3").attr("fill-opacity", 0.2);
   }
-  if(strikeCount == 3){
+  if (strikeCount == 3) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.8);
     $("#strike3").attr("fill-opacity", 0.8);
   }
 }
-function setBatterOuts(outCount){
-  if(outCount == 0){
+function setBatterOuts(outCount) {
+  if (outCount == 0) {
     $("#outs1").attr("fill-opacity", 0.2);
     $("#outs2").attr("fill-opacity", 0.2);
     $("#outs3").attr("fill-opacity", 0.2);
   }
-  if(outCount == 1){
+  if (outCount == 1) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.2);
     $("#outs3").attr("fill-opacity", 0.2);
   }
-  if(outCount == 2){
+  if (outCount == 2) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.8);
     $("#outs3").attr("fill-opacity", 0.2);
   }
-  if(outCount == 3){
+  if (outCount == 3) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.8);
     $("#outs3").attr("fill-opacity", 0.8);
+  }
+}
+function setBattingState() {
+  battingState.map((eachState, index) => {
+    $("#overNumber" + index + 1).text(index + 1);
+    $("#overState" + index + 1).text(eachState);
+  })
+  if (totalBattingNumber < 6) {
+    for (let i = 1; i < 7; i++) {
+      $("#overNumber" + i).attr("x", - 20 + i * 40);
+      $("#overState" + i).attr("x", - 20 + i * 40);
+    }
+  }
+  else {
+    for (let i = 1; i <= totalBattingNumber; i++) {
+      $("#overNumber" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
+      $("#overState" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
+    }
+  }
+  for (let i = totalBattingNumber + 1; i <= 20; i++) {
+    $("#overNumber" + i).text('');
+    $("#overState" + i).text('');
   }
 }
 var dob = 0;
