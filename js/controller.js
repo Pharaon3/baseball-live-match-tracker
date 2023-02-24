@@ -191,6 +191,9 @@ function setBattingState() {
     $("#overState" + i).text('');
   }
 }
+function setScoreTable(where, who, how){
+  $("#" + who + "Table" + where).text(how);
+}
 var dob = 0;
 var gameState = new Array();
 var gameType = new Array();
