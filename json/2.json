@@ -777,7 +777,7 @@
                         "team": "away",
                         "batter_count": {
                             "balls": 2,
-                            "strikes": 2,
+                            "fs": 2,
                             "outs": 1,
                             "pcount": 0,
                             "errors": 0

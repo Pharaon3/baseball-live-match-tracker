@@ -10,6 +10,7 @@ var bestofsets;
 
 var totalBattingNumber;
 var battingState = new Array();
+var curBat, curPit;
 
 function countdown() {
   var interval = setInterval(function () {
@@ -90,6 +91,19 @@ function stepInitialize() {
   if (!gameState.length) return;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
+  let cs = gameState[currentState];
+  if(cs["type"] == "play_start_baseball"){}
+  if(cs["type"] == "play_over_baseball"){
+    if(cs["bases"]){
+      for(let i = 1; i < 4; i ++){
+        if(cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
+        else if(cs["bases"]["" + i]["player_id"] == null) setBase(i, teamNames[curBat]);
+        else setBase(i, cs["bases"]["" + i]["player_id"]);
+      }
+    }
+  }
+  if(cs["type"] == "play_start_baseball"){}
+  
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
@@ -299,7 +313,6 @@ function handleEventData(data) {
       matchStartDate = date.getTime();
     }
     if (match["p"] >= 31 && match["p"] <= 39) {
-      setTimer = false;
       setCenterFrame("Break", homeScore + " : " + awayScore);
       $("#period").text("Break");
     }
@@ -307,10 +320,14 @@ function handleEventData(data) {
     if(match["livestate"]["batter"]["team"] == "home"){
       $("#homeRole").text("BATTER");
       $("#awayRole").text("PITCHER");
+      curBat = "home";
+      curPit = "away";
     }
     if(match["livestate"]["batter"]["team"] == "away"){
       $("#awayRole").text("BATTER");
       $("#homeRole").text("PITCHER");
+      curBat = "away";
+      curPit = "home";
     }
   }
 
