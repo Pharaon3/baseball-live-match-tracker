@@ -97,7 +97,7 @@ function setBase(baseNumber, baseMember) {
   else {
     $("#base" + baseNumber).attr("fill-opacity", "0.2");
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.5");
-    $("#base" + baseNumber + "Member").text("");
+    $("#base" + baseNumber + "Member").text("-");
   }
 }
 function setBatterBall(ballCount){
