@@ -244,6 +244,25 @@ function handleEventData(data) {
     if (result["home"] > -1) homeScore = result["home"];
     if (result["away"] > -1) awayScore = result["away"];
     $("#score").text(homeScore + " - " + awayScore);
+    // Period Score
+    let lastperiodscoreH = homeScore;
+    let lastperiodscoreA = awayScore;
+    if(match["periods"]){
+      for(let i = 1; i <= 9; i ++){
+        if(match["periods"]["p" + i]){
+          $("#homeTable" + i).text(match["periods"]["p" + i]["home"]);
+          $("#awayTable" + i).text(match["periods"]["p" + i]["away"]);
+          lastperiodscoreH -= match["periods"]["p" + i]["home"];
+          lastperiodscoreA -= match["periods"]["p" + i]["away"];
+        }
+        else{
+          $("#homeTable" + i).text(lastperiodscoreH);
+          $("#awayTable" + i).text(lastperiodscoreA);
+          lastperiodscoreH = '-'
+          lastperiodscoreA = '-'
+        }
+      }
+    }
     // Period Setting
     $("#period").text(match["status"]["name"]);
     if (match["status"]["name"] == "Ended") {
