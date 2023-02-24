@@ -236,12 +236,15 @@ function handleEventData(data) {
     document.getElementById("headerAway").textContent = teamNames["away"];
     document.getElementById("homeMember").textContent = teamNames["home"];
     document.getElementById("awayMember").textContent = teamNames["away"];
+    document.getElementById("homeTableName").textContent = teamNames["home"];
+    document.getElementById("awayTableName").textContent = teamNames["away"];
 
     // Score Setting
     var result = match["result"];
     if (result["home"] > -1) homeScore = result["home"];
     if (result["away"] > -1) awayScore = result["away"];
     $("#score").text(homeScore + " - " + awayScore);
+    // Period Setting
     $("#period").text(match["status"]["name"]);
     if (match["status"]["name"] == "Ended") {
       setCenterFrame("Match End", homeScore + " : " + awayScore);
@@ -274,11 +277,19 @@ function handleEventData(data) {
 
       matchStartDate = date.getTime();
     }
-
     if (match["p"] >= 31 && match["p"] <= 39) {
       setTimer = false;
       setCenterFrame("Break", homeScore + " : " + awayScore);
       $("#period").text("Break");
+    }
+    // Batting or Pitching
+    if(match["livestate"]["batter"]["team"] == "home"){
+      $("#homeRole").text("BATTER");
+      $("#awayRole").text("PITCHER");
+    }
+    if(match["livestate"]["batter"]["team"] == "away"){
+      $("#awayRole").text("BATTER");
+      $("#homeRole").text("PITCHER");
     }
   }
 
