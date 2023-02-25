@@ -21,13 +21,17 @@ function countdown() {
     if (matchStartDate) {
       const currentDate = new Date();
       var seconds = Math.floor((matchStartDate - currentDate.getTime()) / 1000);
+      seconds = max(seconds, 0);
       var second = seconds % 60;
       var minutes = Math.floor(seconds / 60);
       var minute = minutes % 60;
       var hours = Math.floor(minutes / 60);
       var hour = hours % 24;
       var days = Math.floor(hours / 24);
-      setCenterFrame(
+      if (seconds == 0) {
+        setCenterFrame("Match about to start", "")
+      }
+      else setCenterFrame(
         "Not Started",
         days + "D " + hour + "H " + minute + "M " + second + "S"
       );
@@ -69,7 +73,7 @@ function setCenterFrame(title, content) {
     .getElementById("center_rect")
     .setAttribute("x", 400 - max(380, titleWidth) / 2);
   if (content == "") {
-    document.getElementById("center_text").setAttribute("y", 310);
+    document.getElementById("center_text").setAttribute("y", 300);
   } else {
     document.getElementById("center_text").setAttribute("y", 280);
   }
@@ -92,28 +96,29 @@ function stepInitialize() {
   if (!gameState.length) return;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
+  resetCenterFrame();
   let cs = gameState[currentState];
-  if(cs["type"] == "play_start_baseball"){}
-  if(cs["type"] == "play_over_baseball"){
-    if(cs["bases"]){
-      if(cs["bases"]['1']["occupied"]){
+  if (cs["type"] == "play_start_baseball") { }
+  if (cs["type"] == "play_over_baseball") {
+    if (cs["bases"]) {
+      if (cs["bases"]['1']["occupied"]) {
         resetBattingState();
       }
-      for(let i = 1; i < 4; i ++){
-        if(cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
-        else if(cs["bases"]["" + i]["player_id"] == null) setBase(i, tAbbr[curBat]);
+      for (let i = 1; i < 4; i++) {
+        if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
+        else if (cs["bases"]["" + i]["player_id"] == null) setBase(i, tAbbr[curBat]);
         else setBase(i, cs["bases"]["" + i]["player_id"]);
       }
     }
   }
-  if(cs["type"] == "play_start_baseball"){}
-  if(cs["batter_count"]){
+  if (cs["type"] == "play_start_baseball") { }
+  if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
   }
-  if(cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
-  if(cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
+  if (cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
+  if (cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
@@ -215,13 +220,13 @@ function setBattingState() {
     $("#overState" + i).text('');
   }
 }
-function resetBattingState(){
-  for(let i = 0; i < 20; i ++){
+function resetBattingState() {
+  for (let i = 0; i < 20; i++) {
     battingState[i] = ''
     totalBattingNumber = 1;
   }
 }
-function setScoreTable(where, who, how){
+function setScoreTable(where, who, how) {
   $("#" + who + "Table" + where).text(how);
 }
 var dob = 0;
@@ -281,21 +286,25 @@ function handleEventData(data) {
     // Period Score
     let lastperiodscoreH = homeScore;
     let lastperiodscoreA = awayScore;
-    if(match["periods"]){
-      for(let i = 1; i <= 9; i ++){
-        if(match["periods"]["p" + i]){
+    if (match["periods"]) {
+      for (let i = 1; i <= 9; i++) {
+        if (match["periods"]["p" + i]) {
           $("#homeTable" + i).text(match["periods"]["p" + i]["home"]);
           $("#awayTable" + i).text(match["periods"]["p" + i]["away"]);
           lastperiodscoreH -= match["periods"]["p" + i]["home"];
           lastperiodscoreA -= match["periods"]["p" + i]["away"];
         }
-        else{
+        else {
           $("#homeTable" + i).text(lastperiodscoreH);
           $("#awayTable" + i).text(lastperiodscoreA);
           lastperiodscoreH = '-'
           lastperiodscoreA = '-'
         }
       }
+    }
+    else if(homeScore > -1){
+      $("#homeTable1").text(homeScore);
+      $("#awayTable1").text(awayScore);
     }
     // Period Setting
     $("#period").text(match["status"]["name"]);
@@ -335,20 +344,20 @@ function handleEventData(data) {
       $("#period").text("Break");
     }
     // Batting or Pitching
-    if(match["livestate"]){
-      if(match["livestate"]["batter"]["team"] == "home"){
+    if (match["livestate"]) {
+      if (match["livestate"]["batter"]["team"] == "home") {
         $("#homeRole").text("BATTER");
         $("#awayRole").text("PITCHER");
         curBat = "home";
         curPit = "away";
       }
-      if(match["livestate"]["batter"]["team"] == "away"){
+      if (match["livestate"]["batter"]["team"] == "away") {
         $("#awayRole").text("BATTER");
         $("#homeRole").text("PITCHER");
         curBat = "away";
         curPit = "home";
       }
-    }    
+    }
   }
 
   var events = data["events"] || {};
