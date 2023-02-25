@@ -112,7 +112,7 @@ function stepInitialize() {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
-    let batter_count = cs["batter_count"]["balls"] + cs["batter_count"]["strikes"] + cs["batter_count"]["outs"];
+    let batter_count = cs["batter_count"]["balls"] + cs["batter_count"]["strikes"];
     for(let i = batter_count; i < 20; i++) battingState[i] = '';
     currentBattNumber = min(currentBattNumber, batter_count - 1);
     currentBattNumber = max(currentBattNumber, 0);
