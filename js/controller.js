@@ -160,6 +160,15 @@ function stepInitialize() {
       setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
     }
   } 
+  if (cs["type"] == "runners_in_motion"){
+    setCenterFrame("Runner in motion", "");
+  }
+  if (cs["type"] == "runner_checked"){
+    setCenterFrame(cs["name"], "");
+  }
+  if (cs["type"] == "run_scored"){
+    setCenterFrame("Run scored", "");
+  }
   $("#innerBall").attr("fill-opacity", 0);
   $("#roundBall").attr("fill-opacity", 0);
   if (cs["type"] == "ball"){
@@ -184,15 +193,6 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", '#f00');
     currentBattNumber ++;
-  }
-  if (cs["type"] == "run_scored"){
-    setCenterFrame("Run scored", "");
-  }
-  if (cs["type"] == "runners_in_motion"){
-    setCenterFrame("Runner in motion", "");
-  }
-  if (cs["type"] == "runner_checked"){
-    setCenterFrame(cs["name"], "");
   }
   if (cs["type"] == "ball_in_play"){
     battingState[currentBattNumber] = 'In play'
