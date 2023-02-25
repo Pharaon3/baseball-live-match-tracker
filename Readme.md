@@ -1,3 +1,3 @@
-# Table tennis live match tracker
+# Baseball live match tracker
 
 ![notyet](./screen/notyet.png)
