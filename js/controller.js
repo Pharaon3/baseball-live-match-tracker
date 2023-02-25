@@ -154,8 +154,8 @@ function stepInitialize() {
     setBatterStrike(0);
     setBatterOuts(0);
   } 
-    $("#innerBall").attr("fill-opacity", 0);
-    $("#roundBall").attr("fill-opacity", 0);
+  $("#innerBall").attr("fill-opacity", 0);
+  $("#roundBall").attr("fill-opacity", 0);
   if (cs["type"] == "ball"){
     battingState[currentBattNumber] = 'Ball';
     $("#roundBall").attr("fill-opacity", 0.5);
@@ -168,6 +168,12 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", '#f00');
     currentBattNumber ++;
+  }
+  if (cs["type"] == "run_scored"){
+    setCenterFrame("Run scored", "");
+  }
+  if (cs["type"] == "runners_in_motion"){
+    setCenterFrame("Runner in motion", "");
   }
   if (cs["type"] == "ball_in_play"){
     battingState[currentBattNumber] = 'In play'
@@ -392,8 +398,8 @@ function setMatch(){
   if (result["home"] > -1) homeScore = result["home"];
   if (result["away"] > -1) awayScore = result["away"];
   $("#score").text(homeScore + " - " + awayScore);
-  $("#homeTableR").text(homeScore);
-  $("#awayTableR").text(awayScore);
+  if(homeScore!= null) $("#homeTableR").text(homeScore);
+  if(awayScore!= null) $("#awayTableR").text(awayScore);
   // Period Score
   let lastperiodscoreH = homeScore;
   let lastperiodscoreA = awayScore;
@@ -413,7 +419,7 @@ function setMatch(){
       }
     }
   }
-  else if (homeScore > -1) {
+  else if (homeScore!= null) {
     $("#homeTable1").text(homeScore);
     $("#awayTable1").text(awayScore);
   }
