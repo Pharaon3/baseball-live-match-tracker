@@ -175,6 +175,16 @@ function stepInitialize() {
     $("#innerBall").attr("fill", '#f00');
     currentBattNumber ++;
   }
+  if (cs["type"] == "strike"){
+    battingState[currentBattNumber] = 'Strike'
+    // "strike_type": "foul_ball"
+    if(cs["strike_type"] == "foul_ball"){
+      battingState[currentBattNumber] = 'Foul'
+    }
+    $("#innerBall").attr("fill-opacity", 0.5);
+    $("#innerBall").attr("fill", '#f00');
+    currentBattNumber ++;
+  }
   if (cs["type"] == "run_scored"){
     setCenterFrame("Run scored", "");
   }
