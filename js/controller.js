@@ -134,9 +134,16 @@ function stepInitialize() {
   if (cs["advancement_type"] && cs["advancement_type"] != "unkown") setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   if (cs["type"] == "batter_out") {
     setCenterFrame("Batter out", "");
+    // "out_type": "ground_out"
+    if(cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
+    if(cs["out_type"] == "fly_out") setCenterFrame("Fly Out", "");
+    if(cs["out_type"] == "line_out") setCenterFrame("Line Out", "");
+    if(cs["out_type"] == "strike_out") setCenterFrame("Strike Out", "");
+    if(cs["out_type"] == "pop_out") setCenterFrame("Pop Out", "");
   }
   if (cs["type"] == "runner_out"){
     setCenterFrame("Runner out", "");
+    if(cs["out_type"] == "caught_stealing") setCenterFrame("Caught stealing", "");
   }
   if (cs["type"] == 'half_inning_start'){
     if (match["p"] >= 31 && match["p"] <= 39) {
