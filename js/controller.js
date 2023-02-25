@@ -119,7 +119,7 @@ function stepInitialize() {
   if (cs["type"] == "play_over_baseball") {
     if (cs["bases"]) {
       if (cs["bases"]['1']["occupied"]) {
-        resetBattingState();
+        // resetBattingState();
       }
       for (let i = 1; i < 4; i++) {
         if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
@@ -139,6 +139,7 @@ function stepInitialize() {
     }
     setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
     resetBattingState();
+    currentBattNumber = 0;
     setBase(1, "");
     setBase(2, "");
     setBase(3, "");
@@ -160,7 +161,7 @@ function stepInitialize() {
   if (cs["type"] == "ball_in_play"){
     battingState[currentBattNumber - 1] = 'In play'
     $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", '#0f0');
+    $("#innerBall").attr("fill", '#00f');
   }
   setBattingState();
 }
@@ -440,6 +441,7 @@ function setMatch(){
     setCenterFrame("Break", homeScore + " : " + awayScore);
     $("#period").text("Break");
     resetBattingState();
+    currentBattNumber = 0;
     setBase(1, "");
     setBase(2, "");
     setBase(3, "");
