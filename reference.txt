@@ -46,3 +46,5 @@ type: "run_scored"
 	name: "Run scored"
 	run_type: "home_run"
 type: "half_inning_start"		this time MIDDLE OF THE INNING
+
+in play : center blue rect
