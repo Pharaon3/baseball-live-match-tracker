@@ -12,6 +12,7 @@ var totalBattingNumber;
 var battingState = new Array();
 var curBat, curPit;
 var tAbbr = new Array();
+var currentBattNumber;
 
 function countdown() {
   var interval = setInterval(function () {
@@ -55,6 +56,9 @@ function load() {
     }
   };
   arrangeScoreTable();
+  for(let i = 0; i < 20; i++){
+    battingState[i] = ''
+  }
 }
 function max(a, b) {
   if (a > b) return a;
@@ -97,7 +101,7 @@ function stepInitialize() {
   if (!gameState.length) return;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
-  let currentBattNumber = 1;
+  currentBattNumber = 1;
   resetCenterFrame();
   let cs = gameState[currentState];
   if (cs["batter_count"]) {
@@ -127,7 +131,16 @@ function stepInitialize() {
   if (cs["type"] == "play_start_baseball") { }
   if (cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   if (cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
-  if (cs["type"] == 'half_inning_start') setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore)
+  if (cs["type"] == 'half_inning_start'){
+    setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
+    resetBattingState();
+    setBase(1, "");
+    setBase(2, "");
+    setBase(3, "");
+    setBatterBall(0);
+    setBatterStrike(0);
+    setBatterOuts(0);
+  } 
   if (cs["type"] == "ball"){
     battingState[currentBattNumber - 1] = 'Ball'
   }
@@ -137,6 +150,7 @@ function stepInitialize() {
   if (cs["type"] == "out"){
     battingState[currentBattNumber - 1] = 'Out'
   }
+  setBattingState();
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
@@ -217,6 +231,7 @@ function setBatterOuts(outCount) {
   }
 }
 function setBattingState() {
+  totalBattingNumber = currentBattNumber;
   battingState.map((eachState, index) => {
     $("#overNumber" + index + 1).text(index + 1);
     $("#overState" + index + 1).text(eachState);
