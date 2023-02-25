@@ -19,7 +19,10 @@ function countdown() {
     changeScreenSize();
     setMatch();
     miliseconds += timeInterval;
-    if (miliseconds % 1000 == 0) stepInitialize();
+    if (miliseconds > 1000) {
+      stepInitialize();
+      miliseconds = 0;
+    }
     if (matchStartDate) {
       const currentDate = new Date();
       var seconds = Math.floor((matchStartDate - currentDate.getTime()) / 1000);
@@ -39,6 +42,7 @@ function countdown() {
       );
       $("#score").text("0 - 0");
     }
+    setBattingState();
   }, timeInterval);
 }
 function load() {
@@ -59,7 +63,7 @@ function load() {
   for(let i = 0; i < 20; i++){
     battingState[i] = ''
   }
-  currentBattNumber = 1;
+  currentBattNumber = 0;
 }
 function max(a, b) {
   if (a > b) return a;
@@ -108,12 +112,10 @@ function stepInitialize() {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
-    currentBattNumber = cs["batter_count"]["balls"] + cs["batter_count"]["strikes"] + cs["batter_count"]["outs"];
-    for(let i = 0; i < currentBattNumber; i++){
-      if(!battingState[i]){
-        battingState[i] = ' '
-      }
-    }
+    let batter_count = cs["batter_count"]["balls"] + cs["batter_count"]["strikes"] + cs["batter_count"]["outs"];
+    for(let i = batter_count; i < 20; i++) battingState[i] = '';
+    currentBattNumber = min(currentBattNumber, batter_count - 1);
+    currentBattNumber = max(currentBattNumber, 0);
   }
   if (cs["type"] == "play_start_baseball") { }
   if (cs["type"] == "play_over_baseball") {
@@ -129,8 +131,13 @@ function stepInitialize() {
     }
   }
   if (cs["type"] == "play_start_baseball") { }
-  if (cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
-  if (cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
+  if (cs["advancement_type"] && cs["advancement_type"] != "unkown") setCenterFrame(cs["advancement_type"], teamNames[curBat]);
+  if (cs["type"] == "batter_out") {
+    setCenterFrame("Batter out", "");
+  }
+  if (cs["type"] == "runner_out"){
+    setCenterFrame("Runner out", "");
+  }
   if (cs["type"] == 'half_inning_start'){
     if (match["p"] >= 31 && match["p"] <= 39) {
       setCenterFrame("Break", homeScore + " : " + awayScore);
@@ -150,20 +157,24 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0);
     $("#roundBall").attr("fill-opacity", 0);
   if (cs["type"] == "ball"){
-    battingState[currentBattNumber - 1] = 'Ball'
+    battingState[currentBattNumber] = 'Ball';
     $("#roundBall").attr("fill-opacity", 0.5);
+    $("#roundBall").attr("fill", "#0f0");
+    currentBattNumber ++;
   }
-  if (cs["type"] == "strike"){
-    battingState[currentBattNumber - 1] = 'Strike'
+  if (cs["type"] == "foul_ball"){
+    battingState[currentBattNumber] = 'Foul'
+    if(cs["name"] == 'Foul ball') battingState[currentBattNumber] = 'Foul'
     $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", '#f30');
+    $("#innerBall").attr("fill", '#f00');
+    currentBattNumber ++;
   }
   if (cs["type"] == "ball_in_play"){
-    battingState[currentBattNumber - 1] = 'In play'
+    battingState[currentBattNumber] = 'In play'
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", '#00f');
+    currentBattNumber ++;
   }
-  setBattingState();
 }
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
@@ -246,8 +257,10 @@ function setBatterOuts(outCount) {
 function setBattingState() {
   totalBattingNumber = currentBattNumber;
   battingState.map((eachState, index) => {
-    $("#overNumber" + (index + 1)).text(index + 1);
-    $("#overState" + (index + 1)).text(eachState);
+    // if(eachState){
+      $("#overNumber" + (index + 1)).text(index + 1);
+      $("#overState" + (index + 1)).text(eachState);
+    // }    
   })
   if (totalBattingNumber < 6) {
     for (let i = 1; i < 7; i++) {
@@ -261,7 +274,7 @@ function setBattingState() {
       $("#overState" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
     }
   }
-  for (let i = totalBattingNumber; i <= 20; i++) {
+  for (let i = totalBattingNumber + 1; i <= 20; i++) {
     $("#overNumber" + i).text('');
     $("#overState" + i).text('');
   }
