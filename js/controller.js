@@ -134,7 +134,6 @@ function stepInitialize() {
   if (cs["advancement_type"] && cs["advancement_type"] != "unkown") setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   if (cs["type"] == "batter_out") {
     setCenterFrame("Batter out", "");
-    // "out_type": "ground_out"
     if(cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
     if(cs["out_type"] == "fly_out") setCenterFrame("Fly Out", "");
     if(cs["out_type"] == "line_out") setCenterFrame("Line Out", "");
@@ -181,6 +180,9 @@ function stepInitialize() {
   }
   if (cs["type"] == "runners_in_motion"){
     setCenterFrame("Runner in motion", "");
+  }
+  if (cs["type"] == "runner_checked"){
+    setCenterFrame(cs["name"], "");
   }
   if (cs["type"] == "ball_in_play"){
     battingState[currentBattNumber] = 'In play'
