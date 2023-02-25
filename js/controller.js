@@ -146,12 +146,6 @@ function stepInitialize() {
     if(cs["out_type"] == "caught_stealing") setCenterFrame("Caught stealing", "");
   }
   if (cs["type"] == 'half_inning_start'){
-    if (match["p"] >= 31 && match["p"] <= 39) {
-      setCenterFrame("Break", homeScore + " : " + awayScore);
-      $("#period").text("Break");
-      return;
-    }
-    setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
     resetBattingState();
     currentBattNumber = 0;
     setBase(1, "");
@@ -160,6 +154,12 @@ function stepInitialize() {
     setBatterBall(0);
     setBatterStrike(0);
     setBatterOuts(0);
+    if (match["p"] >= 31 && match["p"] <= 39) {
+      setCenterFrame("Break", homeScore + " : " + awayScore);
+      $("#period").text("Break");
+    } else {
+      setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
+    }
   } 
   $("#innerBall").attr("fill-opacity", 0);
   $("#roundBall").attr("fill-opacity", 0);
