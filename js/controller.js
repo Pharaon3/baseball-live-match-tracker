@@ -132,6 +132,11 @@ function stepInitialize() {
   if (cs["advancement_type"]) setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   if (cs["type"] == "batter_out") setCenterFrame("Batter out", teamNames[curBat]);
   if (cs["type"] == 'half_inning_start'){
+    if (match["p"] >= 31 && match["p"] <= 39) {
+      setCenterFrame("Break", homeScore + " : " + awayScore);
+      $("#period").text("Break");
+      return;
+    }
     setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
     resetBattingState();
     setBase(1, "");
@@ -141,14 +146,21 @@ function stepInitialize() {
     setBatterStrike(0);
     setBatterOuts(0);
   } 
+    $("#innerBall").attr("fill-opacity", 0);
+    $("#roundBall").attr("fill-opacity", 0);
   if (cs["type"] == "ball"){
     battingState[currentBattNumber - 1] = 'Ball'
+    $("#roundBall").attr("fill-opacity", 0.5);
   }
   if (cs["type"] == "strike"){
     battingState[currentBattNumber - 1] = 'Strike'
+    $("#innerBall").attr("fill-opacity", 0.5);
+    $("#innerBall").attr("fill", '#f30');
   }
-  if (cs["type"] == "out"){
-    battingState[currentBattNumber - 1] = 'Out'
+  if (cs["type"] == "ball_in_play"){
+    battingState[currentBattNumber - 1] = 'In play'
+    $("#innerBall").attr("fill-opacity", 0.5);
+    $("#innerBall").attr("fill", '#0f0');
   }
   setBattingState();
 }
@@ -233,8 +245,9 @@ function setBatterOuts(outCount) {
 function setBattingState() {
   totalBattingNumber = currentBattNumber;
   battingState.map((eachState, index) => {
-    $("#overNumber" + index + 1).text(index + 1);
-    $("#overState" + index + 1).text(eachState);
+    $("#overNumber" + (index + 1)).text(index + 1);
+    $("#overState" + (index + 1)).text(eachState);
+    console.log($("#overNumber" + (index + 1)));
   })
   if (totalBattingNumber < 6) {
     for (let i = 1; i < 7; i++) {
@@ -261,6 +274,9 @@ function resetBattingState() {
 }
 function setScoreTable(where, who, how) {
   $("#" + who + "Table" + where).text(how);
+}
+function setInPlay(){
+
 }
 var dob = 0;
 var gameState = new Array();
