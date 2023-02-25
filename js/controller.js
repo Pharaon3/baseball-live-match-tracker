@@ -59,6 +59,7 @@ function load() {
   for(let i = 0; i < 20; i++){
     battingState[i] = ''
   }
+  currentBattNumber = 1;
 }
 function max(a, b) {
   if (a > b) return a;
@@ -101,7 +102,6 @@ function stepInitialize() {
   if (!gameState.length) return;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
-  currentBattNumber = 1;
   resetCenterFrame();
   let cs = gameState[currentState];
   if (cs["batter_count"]) {
@@ -247,7 +247,6 @@ function setBattingState() {
   battingState.map((eachState, index) => {
     $("#overNumber" + (index + 1)).text(index + 1);
     $("#overState" + (index + 1)).text(eachState);
-    console.log($("#overNumber" + (index + 1)));
   })
   if (totalBattingNumber < 6) {
     for (let i = 1; i < 7; i++) {
@@ -261,7 +260,7 @@ function setBattingState() {
       $("#overState" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
     }
   }
-  for (let i = totalBattingNumber + 1; i <= 20; i++) {
+  for (let i = totalBattingNumber; i <= 20; i++) {
     $("#overNumber" + i).text('');
     $("#overState" + i).text('');
   }
@@ -440,6 +439,13 @@ function setMatch(){
   if (match["p"] >= 31 && match["p"] <= 39) {
     setCenterFrame("Break", homeScore + " : " + awayScore);
     $("#period").text("Break");
+    resetBattingState();
+    setBase(1, "");
+    setBase(2, "");
+    setBase(3, "");
+    setBatterBall(0);
+    setBatterStrike(0);
+    setBatterOuts(0);
   }
   // Batting or Pitching
   if (match["livestate"]) {
