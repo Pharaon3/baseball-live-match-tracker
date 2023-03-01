@@ -47,24 +47,48 @@ function countdown() {
 }
 function load() {
   countdown();
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventId = Number(urlParams.get("eventId"));
-  socket = new WebSocket("wss://gamecast.betdata.pro:8443");
-  socket.onopen = function (e) {
-    socket.send(JSON.stringify({ r: "subscribe_event", a: { id: eventId } }));
-  };
-  socket.onmessage = function (e) {
-    var data = JSON.parse(e.data);
-    if (data.r == "event") {
-      handleEventData(data.d);
-    }
-  };
   arrangeScoreTable();
   for(let i = 0; i < 20; i++){
     battingState[i] = ''
   }
   currentBattNumber = 0;
+	connect();
 }
+
+
+function connect() {
+	const urlParams = new URLSearchParams(window.location.search);
+	const eventId = Number(urlParams.get('eventId'));
+
+	socket=new WebSocket("wss://gamecast.betdata.pro:8443");
+	socket.onopen=function(e) {
+		socketLastResponseTime = Date.now();
+		socket.send(JSON.stringify({r:"subscribe_event", a:{id:eventId}}));
+	};
+
+	socket.onmessage=function(e) {
+		socketLastResponseTime = Date.now();
+		var data = JSON.parse(e.data);
+
+		if (data.r == 'event') {
+			// New function added for websocket. Call it.
+			handleEventData(data.d);
+		}
+	};
+}
+setInterval(function() {
+	if (socketLastResponseTime && (Date.now() - socketLastResponseTime) > 8000) {
+		if (socket) {
+			try {
+				socket.close();
+			} catch (err) {};
+		}
+		console.log('Reconnecting...');
+		connect();
+	}
+}, 4000);
+
+
 function max(a, b) {
   if (a > b) return a;
   return b;
