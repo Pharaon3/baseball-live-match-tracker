@@ -7,6 +7,7 @@ var matchStartDate;
 var match;
 var innings;
 var bestofsets;
+var socketLastResponseTime;
 
 var totalBattingNumber;
 var battingState = new Array();
