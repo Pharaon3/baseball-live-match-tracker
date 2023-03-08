@@ -179,8 +179,8 @@ function stepInitialize() {
     setBatterStrike(0);
     setBatterOuts(0);
     if (match["p"] >= 31 && match["p"] <= 39) {
-      setCenterFrame("Break", homeScore + " : " + awayScore);
-      $("#period").text("Break");
+      setCenterFrame("End of inning", homeScore + " : " + awayScore);
+      $("#period").text(order(match["p"] % 10));
     } else {
       setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
     }
@@ -224,6 +224,14 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", '#00f');
     currentBattNumber ++;
+  }
+  if (cs["home"]){
+    $("#homeTableH").text(cs["home"]["hits"])
+    $("#homeTableE").text(cs["home"]["errors"])
+  }
+  if (cs["away"]){
+    $("#awayTableH").text(cs["away"]["hits"])
+    $("#awayTableE").text(cs["away"]["errors"])
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -501,8 +509,8 @@ function setMatch(){
     matchStartDate = date.getTime();
   }
   if (match["p"] >= 31 && match["p"] <= 39) {
-    setCenterFrame("Break", homeScore + " : " + awayScore);
-    $("#period").text("Break");
+    setCenterFrame("End of inning", homeScore + " : " + awayScore);
+    $("#period").text(order(match["p"] % 10));
     resetBattingState();
     currentBattNumber = 0;
     setBase(1, "");
@@ -529,4 +537,11 @@ function setMatch(){
   }
 
 
+}
+
+function order(params) {
+  if(params == 1) return "1st"
+  if(params == 2) return "2nd"
+  if(params == 3) return "3rd"
+  return params + "th"
 }
