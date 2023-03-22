@@ -14,11 +14,14 @@ var battingState = new Array();
 var curBat, curPit;
 var tAbbr = new Array();
 var currentBattNumber;
+var isLimitedCov = false;
 
 function countdown() {
   var interval = setInterval(function () {
     changeScreenSize();
     setMatch();
+    if (isLimitedCov)
+      setCenterFrame("Limited Coverage", homeScore + " : " + awayScore);
     miliseconds += timeInterval;
     if (miliseconds > 1000) {
       stepInitialize();
@@ -35,12 +38,12 @@ function countdown() {
       var hour = hours % 24;
       var days = Math.floor(hours / 24);
       if (seconds == 0) {
-        setCenterFrame("Match about to start", "")
-      }
-      else setCenterFrame(
-        "Not Started",
-        days + "D " + hour + "H " + minute + "M " + second + "S"
-      );
+        setCenterFrame("Match about to start", "");
+      } else
+        setCenterFrame(
+          "Not Started",
+          days + "D " + hour + "H " + minute + "M " + second + "S"
+        );
       $("#score").text("0 - 0");
     }
     setBattingState();
@@ -49,46 +52,44 @@ function countdown() {
 function load() {
   countdown();
   arrangeScoreTable();
-  for(let i = 0; i < 20; i++){
-    battingState[i] = ''
+  for (let i = 0; i < 20; i++) {
+    battingState[i] = "";
   }
   currentBattNumber = 0;
-	connect();
+  connect();
 }
-
 
 function connect() {
-	const urlParams = new URLSearchParams(window.location.search);
-	const eventId = Number(urlParams.get('eventId'));
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = Number(urlParams.get("eventId"));
 
-	socket=new WebSocket("wss://gamecast.betdata.pro:8443");
-	socket.onopen=function(e) {
-		socketLastResponseTime = Date.now();
-		socket.send(JSON.stringify({r:"subscribe_event", a:{id:eventId}}));
-	};
+  socket = new WebSocket("wss://gamecast.betdata.pro:8443");
+  socket.onopen = function (e) {
+    socketLastResponseTime = Date.now();
+    socket.send(JSON.stringify({ r: "subscribe_event", a: { id: eventId } }));
+  };
 
-	socket.onmessage=function(e) {
-		socketLastResponseTime = Date.now();
-		var data = JSON.parse(e.data);
+  socket.onmessage = function (e) {
+    socketLastResponseTime = Date.now();
+    var data = JSON.parse(e.data);
 
-		if (data.r == 'event') {
-			// New function added for websocket. Call it.
-			handleEventData(data.d);
-		}
-	};
+    if (data.r == "event") {
+      // New function added for websocket. Call it.
+      handleEventData(data.d);
+    }
+  };
 }
-setInterval(function() {
-	if (socketLastResponseTime && (Date.now() - socketLastResponseTime) > 8000) {
-		if (socket) {
-			try {
-				socket.close();
-			} catch (err) {};
-		}
-		console.log('Reconnecting...');
-		connect();
-	}
+setInterval(function () {
+  if (socketLastResponseTime && Date.now() - socketLastResponseTime > 8000) {
+    if (socket) {
+      try {
+        socket.close();
+      } catch (err) {}
+    }
+    console.log("Reconnecting...");
+    connect();
+  }
 }, 4000);
-
 
 function max(a, b) {
   if (a > b) return a;
@@ -131,45 +132,51 @@ function stepInitialize() {
   if (!gameState.length) return;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
-  resetCenterFrame();
+  if (!isLimitedCov) resetCenterFrame();
   let cs = gameState[currentState];
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
-    let batter_count = cs["batter_count"]["balls"] + cs["batter_count"]["strikes"];
-    for(let i = batter_count; i < 20; i++) battingState[i] = '';
+    let batter_count =
+      cs["batter_count"]["balls"] + cs["batter_count"]["strikes"];
+    for (let i = batter_count; i < 20; i++) battingState[i] = "";
     currentBattNumber = min(currentBattNumber, batter_count - 1);
     currentBattNumber = max(currentBattNumber, 0);
   }
-  if (cs["type"] == "play_start_baseball") { }
+  if (cs["type"] == "play_start_baseball") {
+  }
   if (cs["type"] == "play_over_baseball") {
     if (cs["bases"]) {
-      if (cs["bases"]['1']["occupied"]) {
+      if (cs["bases"]["1"]["occupied"]) {
         // resetBattingState();
       }
       for (let i = 1; i < 4; i++) {
-        if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "")
-        else if (cs["bases"]["" + i]["player_id"] == null) setBase(i, tAbbr[curBat]);
+        if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "");
+        else if (cs["bases"]["" + i]["player_id"] == null)
+          setBase(i, tAbbr[curBat]);
         else setBase(i, cs["bases"]["" + i]["player_id"]);
       }
     }
   }
-  if (cs["type"] == "play_start_baseball") { }
-  if (cs["advancement_type"] && cs["advancement_type"] != "unkown") setCenterFrame(cs["advancement_type"], teamNames[curBat]);
+  if (cs["type"] == "play_start_baseball") {
+  }
+  if (cs["advancement_type"] && cs["advancement_type"] != "unkown")
+    setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   if (cs["type"] == "batter_out") {
     setCenterFrame("Batter out", "");
-    if(cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
-    if(cs["out_type"] == "fly_out") setCenterFrame("Fly Out", "");
-    if(cs["out_type"] == "line_out") setCenterFrame("Line Out", "");
-    if(cs["out_type"] == "strike_out") setCenterFrame("Strike Out", "");
-    if(cs["out_type"] == "pop_out") setCenterFrame("Pop Out", "");
+    if (cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
+    if (cs["out_type"] == "fly_out") setCenterFrame("Fly Out", "");
+    if (cs["out_type"] == "line_out") setCenterFrame("Line Out", "");
+    if (cs["out_type"] == "strike_out") setCenterFrame("Strike Out", "");
+    if (cs["out_type"] == "pop_out") setCenterFrame("Pop Out", "");
   }
-  if (cs["type"] == "runner_out"){
+  if (cs["type"] == "runner_out") {
     setCenterFrame("Runner out", "");
-    if(cs["out_type"] == "caught_stealing") setCenterFrame("Caught stealing", "");
+    if (cs["out_type"] == "caught_stealing")
+      setCenterFrame("Caught stealing", "");
   }
-  if (cs["type"] == 'half_inning_start'){
+  if (cs["type"] == "half_inning_start") {
     resetBattingState();
     currentBattNumber = 0;
     setBase(1, "");
@@ -182,56 +189,56 @@ function stepInitialize() {
       setCenterFrame("End of inning", homeScore + " : " + awayScore);
       $("#period").text(order(match["p"] % 10));
     } else {
-      setCenterFrame("MIDDLE OF THE INNING", homeScore + ' : ' + awayScore);
+      setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
     }
-  } 
-  if (cs["type"] == "runners_in_motion"){
+  }
+  if (cs["type"] == "runners_in_motion") {
     setCenterFrame("Runner in motion", "");
   }
-  if (cs["type"] == "runner_checked"){
+  if (cs["type"] == "runner_checked") {
     setCenterFrame(cs["name"], "");
   }
-  if (cs["type"] == "run_scored"){
+  if (cs["type"] == "run_scored") {
     setCenterFrame("Run scored", "");
   }
   $("#innerBall").attr("fill-opacity", 0);
   $("#roundBall").attr("fill-opacity", 0);
-  if (cs["type"] == "ball"){
-    battingState[currentBattNumber] = 'Ball';
+  if (cs["type"] == "ball") {
+    battingState[currentBattNumber] = "Ball";
     $("#roundBall").attr("fill-opacity", 0.5);
     $("#roundBall").attr("fill", "#0f0");
-    currentBattNumber ++;
+    currentBattNumber++;
   }
-  if (cs["type"] == "foul_ball"){
-    battingState[currentBattNumber] = 'Foul'
-    if(cs["name"] == 'Foul ball') battingState[currentBattNumber] = 'Foul'
+  if (cs["type"] == "foul_ball") {
+    battingState[currentBattNumber] = "Foul";
+    if (cs["name"] == "Foul ball") battingState[currentBattNumber] = "Foul";
     $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", '#f00');
-    currentBattNumber ++;
+    $("#innerBall").attr("fill", "#f00");
+    currentBattNumber++;
   }
-  if (cs["type"] == "strike"){
-    battingState[currentBattNumber] = 'Strike'
+  if (cs["type"] == "strike") {
+    battingState[currentBattNumber] = "Strike";
     // "strike_type": "foul_ball"
-    if(cs["strike_type"] == "foul_ball"){
-      battingState[currentBattNumber] = 'Foul'
+    if (cs["strike_type"] == "foul_ball") {
+      battingState[currentBattNumber] = "Foul";
     }
     $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", '#f00');
-    currentBattNumber ++;
+    $("#innerBall").attr("fill", "#f00");
+    currentBattNumber++;
   }
-  if (cs["type"] == "ball_in_play"){
-    battingState[currentBattNumber] = 'In play'
+  if (cs["type"] == "ball_in_play") {
+    battingState[currentBattNumber] = "In play";
     $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", '#00f');
-    currentBattNumber ++;
+    $("#innerBall").attr("fill", "#00f");
+    currentBattNumber++;
   }
-  if (cs["home"]){
-    $("#homeTableH").text(cs["home"]["hits"])
-    $("#homeTableE").text(cs["home"]["errors"])
+  if (cs["home"]) {
+    // $("#homeTableH").text(cs["home"]["hits"]);
+    // $("#homeTableE").text(cs["home"]["errors"]);
   }
-  if (cs["away"]){
-    $("#awayTableH").text(cs["away"]["hits"])
-    $("#awayTableE").text(cs["away"]["errors"])
+  if (cs["away"]) {
+    // $("#awayTableH").text(cs["away"]["hits"]);
+    // $("#awayTableE").text(cs["away"]["errors"]);
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -239,8 +246,7 @@ function setBase(baseNumber, baseMember) {
     $("#base" + baseNumber).attr("fill-opacity", "0.8");
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.8");
     $("#base" + baseNumber + "Member").text(baseMember);
-  }
-  else {
+  } else {
     $("#base" + baseNumber).attr("fill-opacity", "0.2");
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.5");
     $("#base" + baseNumber + "Member").text("-");
@@ -316,39 +322,42 @@ function setBattingState() {
   totalBattingNumber = currentBattNumber;
   battingState.map((eachState, index) => {
     // if(eachState){
-      $("#overNumber" + (index + 1)).text(index + 1);
-      $("#overState" + (index + 1)).text(eachState);
-    // }    
-  })
+    $("#overNumber" + (index + 1)).text(index + 1);
+    $("#overState" + (index + 1)).text(eachState);
+    // }
+  });
   if (totalBattingNumber < 6) {
     for (let i = 1; i < 7; i++) {
-      $("#overNumber" + i).attr("x", - 20 + i * 40);
-      $("#overState" + i).attr("x", - 20 + i * 40);
+      $("#overNumber" + i).attr("x", -20 + i * 40);
+      $("#overState" + i).attr("x", -20 + i * 40);
     }
-  }
-  else {
+  } else {
     for (let i = 1; i <= totalBattingNumber; i++) {
-      $("#overNumber" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
-      $("#overState" + i).attr("x", 20 + (i - 1) * 230 / (totalBattingNumber - 1));
+      $("#overNumber" + i).attr(
+        "x",
+        20 + ((i - 1) * 230) / (totalBattingNumber - 1)
+      );
+      $("#overState" + i).attr(
+        "x",
+        20 + ((i - 1) * 230) / (totalBattingNumber - 1)
+      );
     }
   }
   for (let i = totalBattingNumber + 1; i <= 20; i++) {
-    $("#overNumber" + i).text('');
-    $("#overState" + i).text('');
+    $("#overNumber" + i).text("");
+    $("#overState" + i).text("");
   }
 }
 function resetBattingState() {
   for (let i = 0; i < 20; i++) {
-    battingState[i] = ''
+    battingState[i] = "";
     totalBattingNumber = 1;
   }
 }
 function setScoreTable(where, who, how) {
   $("#" + who + "Table" + where).text(how);
 }
-function setInPlay(){
-
-}
+function setInPlay() {}
 var dob = 0;
 var gameState = new Array();
 var gameType = new Array();
@@ -383,17 +392,16 @@ function handleEventData(data) {
     }
   });
   lastEvents = newEvents;
-
 }
 function handleInfoData(data) {
   var data1 = data.info;
   var jerseys = data1["jerseys"];
-  homePlayerColor = jerseys["home"]["player"]["base"];
-  awayPlayerColor = jerseys["away"]["player"]["base"];
+  homePlayerColor = invertHex(jerseys?.home?.player?.sleeve);
+  awayPlayerColor = invertHex(jerseys?.away?.player?.sleeve);
   // homePlayerColor = jerseys["home"]["player"]["sleeve"];
   // awayPlayerColor = jerseys["away"]["player"]["sleeve"];
-  $("#homerbox").attr("fill", "#" + homePlayerColor);
-  $("#awaybox").attr("fill", "#" + awayPlayerColor);
+  // $("#homebox").attr("fill", "#" + homePlayerColor);
+  // $("#awaybox").attr("fill", "#" + awayPlayerColor);
 }
 function changeScreenSize() {
   screenHeight = window.innerHeight;
@@ -412,12 +420,15 @@ function min(a, b) {
   return a;
 }
 function arrangeScoreTable() {
-  $("#homePeriodScore").append('<text font-size="12" x="0" y="0" text-anchor="middle" fill="#fff">11</text>')
+  $("#homePeriodScore").append(
+    '<text font-size="12" x="0" y="0" text-anchor="middle" fill="#fff">11</text>'
+  );
 }
-function setMatch(){
-  if(!match) return;
-  if (match["status"]["name"] == "Interrupted") {
+function setMatch() {
+  if (!match) return;
+  if (match["coverage"]["lmtsupport"] == 2) {
     isLimitedCov = true;
+    $("#overBackground").attr("fill-opacity", 0);
   } else isLimitedCov = false;
   bestofsets = match["numberofperiods"];
   var teams = match["teams"];
@@ -445,13 +456,19 @@ function setMatch(){
   document.getElementById("homeTableName").textContent = tAbbr["home"];
   document.getElementById("awayTableName").textContent = tAbbr["away"];
 
+  // H and E
+  $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value?.total)
+  $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value?.total)
+  $("#homeTableE").text(teams?.home?.stats?.fielding_errors_total?.value?.total)
+  $("#awayTableE").text(teams?.away?.stats?.fielding_errors_total?.value?.total)
+
   // Score Setting
   var result = match["result"];
   if (result["home"] > -1) homeScore = result["home"];
   if (result["away"] > -1) awayScore = result["away"];
   $("#score").text(homeScore + " - " + awayScore);
-  if(homeScore!= null) $("#homeTableR").text(homeScore);
-  if(awayScore!= null) $("#awayTableR").text(awayScore);
+  if (homeScore != null) $("#homeTableR").text(homeScore);
+  if (awayScore != null) $("#awayTableR").text(awayScore);
   // Period Score
   let lastperiodscoreH = homeScore;
   let lastperiodscoreA = awayScore;
@@ -462,16 +479,14 @@ function setMatch(){
         $("#awayTable" + i).text(match["periods"]["p" + i]["away"]);
         lastperiodscoreH -= match["periods"]["p" + i]["home"];
         lastperiodscoreA -= match["periods"]["p" + i]["away"];
-      }
-      else {
+      } else {
         $("#homeTable" + i).text(lastperiodscoreH);
         $("#awayTable" + i).text(lastperiodscoreA);
-        lastperiodscoreH = '-'
-        lastperiodscoreA = '-'
+        lastperiodscoreH = "-";
+        lastperiodscoreA = "-";
       }
     }
-  }
-  else if (homeScore!= null) {
+  } else if (homeScore != null) {
     $("#homeTable1").text(homeScore);
     $("#awayTable1").text(awayScore);
   }
@@ -497,13 +512,13 @@ function setMatch(){
     var matchDate = match["_dt"]["date"].split("/");
     var date = new Date(
       matchDate[1] +
-      "/" +
-      matchDate[0] +
-      "/20" +
-      matchDate[2] +
-      " " +
-      match["_dt"]["time"] +
-      ":00 UTC"
+        "/" +
+        matchDate[0] +
+        "/20" +
+        matchDate[2] +
+        " " +
+        match["_dt"]["time"] +
+        ":00 UTC"
     );
 
     matchStartDate = date.getTime();
@@ -535,13 +550,14 @@ function setMatch(){
       curPit = "home";
     }
   }
-
-
 }
 
 function order(params) {
-  if(params == 1) return "1st"
-  if(params == 2) return "2nd"
-  if(params == 3) return "3rd"
-  return params + "th"
+  if (params == 1) return "1st";
+  if (params == 2) return "2nd";
+  if (params == 3) return "3rd";
+  return params + "th";
+}
+function invertHex(hex) {
+  return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
 }
