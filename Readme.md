@@ -1,3 +1,3 @@
 # Baseball live match tracker
 
-![notyet](./screen/notyet.png)
+![limitedCoverage](./screen/limited coverage.png)
