@@ -23,10 +23,6 @@ function countdown() {
     if (isLimitedCov)
       setCenterFrame("Limited Coverage", homeScore + " : " + awayScore);
     miliseconds += timeInterval;
-    if (miliseconds > 1000) {
-      stepInitialize();
-      miliseconds = 0;
-    }
     if (matchStartDate) {
       const currentDate = new Date();
       var seconds = Math.floor((matchStartDate - currentDate.getTime()) / 1000);
@@ -45,6 +41,9 @@ function countdown() {
           days + "D " + hour + "H " + minute + "M " + second + "S"
         );
       $("#score").text("0 - 0");
+    } else if (miliseconds > 1000) {
+      stepInitialize();
+      miliseconds = 0;
     }
     setBattingState();
   }, timeInterval);
@@ -130,9 +129,11 @@ function capitalizeWords(arr) {
 }
 function stepInitialize() {
   if (!gameState.length) return;
+  var teams = match["teams"];
+  let lastState = currentState;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
-  if (!isLimitedCov) resetCenterFrame();
+  if (!isLimitedCov && currentState != lastState) resetCenterFrame();
   let cs = gameState[currentState];
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
@@ -155,7 +156,11 @@ function stepInitialize() {
         if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "");
         else if (cs["bases"]["" + i]["player_id"] == null)
           setBase(i, tAbbr[curBat]);
-        else setBase(i, cs["bases"]["" + i]["player_id"]);
+        else
+          setBase(
+            i,
+            teams[curBat]?.players?.[cs["bases"]["" + i]["player_id"]]
+          );
       }
     }
   }
@@ -226,11 +231,17 @@ function stepInitialize() {
     $("#innerBall").attr("fill", "#f00");
     currentBattNumber++;
   }
+  if (cs["type"] == "gumbo_commentary") {
+    setCenterFrame("Runner Advances", "");
+  }
   if (cs["type"] == "ball_in_play") {
     battingState[currentBattNumber] = "In play";
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", "#00f");
     currentBattNumber++;
+  }
+  if (cs["type"] == "player_on_base_x") {
+    setCenterFrame("Runner Advances", "");
   }
   if (cs["home"]) {
     // $("#homeTableH").text(cs["home"]["hits"]);
@@ -364,7 +375,7 @@ var gameType = new Array();
 var newEvents = new Array();
 var lastEvents = new Array();
 var awayteamname, hometeamname;
-var homeScore, awayScore, periodlength, getDataTime;
+var homeScore = 0, awayScore = 0, periodlength, getDataTime;
 var teamNames = new Array();
 var periodScoreH = new Array();
 var periodScoreA = new Array();
@@ -375,6 +386,7 @@ function handleEventData(data) {
     handleInfoData(data);
   }
   if (data["match"]) match = data["match"];
+  if (data?.stats_match_stats?.match) match = data?.stats_match_stats?.match;
 
   var events = data["events"] || {};
 
@@ -396,12 +408,12 @@ function handleEventData(data) {
 function handleInfoData(data) {
   var data1 = data.info;
   var jerseys = data1["jerseys"];
-  homePlayerColor = invertHex(jerseys?.home?.player?.sleeve);
-  awayPlayerColor = invertHex(jerseys?.away?.player?.sleeve);
+  homePlayerColor = jerseys?.home?.player?.sleeve;
+  awayPlayerColor = jerseys?.away?.player?.sleeve;
   // homePlayerColor = jerseys["home"]["player"]["sleeve"];
   // awayPlayerColor = jerseys["away"]["player"]["sleeve"];
-  // $("#homebox").attr("fill", "#" + homePlayerColor);
-  // $("#awaybox").attr("fill", "#" + awayPlayerColor);
+  $("#homebox").attr("fill", "#" + homePlayerColor);
+  $("#awaybox").attr("fill", "#" + awayPlayerColor);
 }
 function changeScreenSize() {
   screenHeight = window.innerHeight;
@@ -426,7 +438,7 @@ function arrangeScoreTable() {
 }
 function setMatch() {
   if (!match) return;
-  if (match["coverage"]["lmtsupport"] == 2) {
+  if (match?.coverage?.lmtsupport == 2) {
     isLimitedCov = true;
     $("#overBackground").attr("fill-opacity", 0);
   } else isLimitedCov = false;
@@ -457,15 +469,21 @@ function setMatch() {
   document.getElementById("awayTableName").textContent = tAbbr["away"];
 
   // H and E
-  $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value?.total)
-  $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value?.total)
-  $("#homeTableE").text(teams?.home?.stats?.fielding_errors_total?.value?.total)
-  $("#awayTableE").text(teams?.away?.stats?.fielding_errors_total?.value?.total)
+  if (teams?.home?.stats?.hitting_hits?.value) {
+    $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value?.total);
+    $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value?.total);
+    $("#homeTableE").text(
+      teams?.home?.stats?.fielding_errors_total?.value?.total
+    );
+    $("#awayTableE").text(
+      teams?.away?.stats?.fielding_errors_total?.value?.total
+    );
+  }
 
   // Score Setting
   var result = match["result"];
-  if (result["home"] > -1) homeScore = result["home"];
-  if (result["away"] > -1) awayScore = result["away"];
+  if (result["home"] > -1 && result.home != null) homeScore = result["home"];
+  if (result["away"] > -1 && result.away != null) awayScore = result["away"];
   $("#score").text(homeScore + " - " + awayScore);
   if (homeScore != null) $("#homeTableR").text(homeScore);
   if (awayScore != null) $("#awayTableR").text(awayScore);
@@ -474,7 +492,7 @@ function setMatch() {
   let lastperiodscoreA = awayScore;
   if (match["periods"]) {
     for (let i = 1; i <= 9; i++) {
-      if (match["periods"]["p" + i]) {
+      if (match["periods"]["p" + i] && match["periods"]["p" + i]["home"] != null) {
         $("#homeTable" + i).text(match["periods"]["p" + i]["home"]);
         $("#awayTable" + i).text(match["periods"]["p" + i]["away"]);
         lastperiodscoreH -= match["periods"]["p" + i]["home"];
@@ -491,16 +509,16 @@ function setMatch() {
     $("#awayTable1").text(awayScore);
   }
   // Period Setting
-  $("#period").text(match["status"]["name"]);
-  if (match["status"]["name"] == "Ended") {
+  $("#period").text(match?.status?.name);
+  if (match?.status?.name == "Ended") {
     setCenterFrame("Match End", homeScore + " : " + awayScore);
     $("#period").text("Ended");
   }
-  if (match["status"]["name"] == "Break") {
+  if (match?.status?.name == "Break") {
     setCenterFrame("Break", homeScore + " : " + awayScore);
     $("#period").text("Break");
   }
-  if (match["status"]["name"] == "Not started") {
+  if (match?.status?.name == "Not started") {
     $("#period").text("Not Yet");
     const currentDate = new Date();
     upCommingTime = currentDate.getTime() / 1000 - match["updated_uts"];
@@ -522,7 +540,7 @@ function setMatch() {
     );
 
     matchStartDate = date.getTime();
-  }
+  } else matchStartDate = null;
   if (match["p"] >= 31 && match["p"] <= 39) {
     setCenterFrame("End of inning", homeScore + " : " + awayScore);
     $("#period").text(order(match["p"] % 10));
@@ -559,5 +577,5 @@ function order(params) {
   return params + "th";
 }
 function invertHex(hex) {
-  return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
+  return (Number(`0x1${hex}`) ^ 0xffffff).toString(16).substr(1).toUpperCase();
 }
