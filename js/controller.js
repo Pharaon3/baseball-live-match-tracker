@@ -95,7 +95,7 @@ function max(a, b) {
   return b;
 }
 function setCenterFrame(title, content) {
-  if(title == "unkown") return;
+  if (title == "unknown") return;
   title = getString(title);
   document.getElementById("center_rect").setAttribute("fill-opacity", 0.5);
   center_text = capitalizeWords(title.split(" ")).join(" ");
@@ -138,7 +138,8 @@ function stepInitialize() {
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
   // if (currentState == lastState) return;
   let cs = gameState[currentState];
-  setCenterFrame(getString(cs?.type), teamNames[cs?.team])
+  if (cs?.type != "play_over_baseball" && cs?.type != "player_on_base_x")
+    setCenterFrame(getString(cs?.type), teamNames[cs?.team]);
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
@@ -179,16 +180,18 @@ function stepInitialize() {
   }
   if (cs["type"] == "play_start_baseball") {
   }
-  if (cs["advancement_type"] && cs["advancement_type"] != "unkown"){
+  if (cs["advancement_type"] && cs["advancement_type"] != "unkown") {
     setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   }
   if (cs["type"] == "batter_out") {
     setCenterFrame("Batter out", teamNames[curBat]);
-    if (cs["out_type"] && cs.out_type != 'unkown') setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
+    if (cs["out_type"] && cs.out_type != "unkown")
+      setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
   }
   if (cs["type"] == "player_out") {
     setCenterFrame("Player out", "");
-    if (cs["out_type"] && cs.out_type != 'unkown') setCenterFrame(getString(cs?.out_type), "");
+    if (cs["out_type"] && cs.out_type != "unkown")
+      setCenterFrame(getString(cs?.out_type), "");
   }
   if (cs["type"] == "runner_out") {
     setCenterFrame("Runner out", "");
@@ -267,13 +270,23 @@ function stepInitialize() {
     // $("#awayTableH").text(cs["away"]["hits"]);
     // $("#awayTableE").text(cs["away"]["errors"]);
   }
-  if (cs?.batter?.playerid) {
-    $("#" + curBat + "Member").text(getName(cs?.batter?.playerid));
-    console.log("batter name");
+  if (cs?.batter?.playerid && getName(cs?.batter?.playerid)) {
+    if(curBat == "home"){
+      $("#homeMember").text(getName(cs?.batter?.playerid));
+    }
+    if(curBat == "away"){
+      $("#awayMember").text(getName(cs?.batter?.playerid));
+    }
+    console.log("batter name", getName(cs?.batter?.playerid));
   }
-  if (cs?.pitcher?.playerid) {
-    $("#" + curPit + "Member").text(getName(cs?.pitcher?.playerid));
-    console.log("pitcher name");
+  if (cs?.pitcher?.playerid && getName(cs?.pitcher?.playerid)) {
+    if(curPit == "home"){
+      $("#homeMember").text(getName(cs?.pitcher?.playerid));
+    }
+    if(curPit == "away"){
+      $("#awayMember").text(getName(cs?.pitcher?.playerid));
+    }
+    console.log("pitcher name", getName(cs?.pitcher?.playerid));
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -426,8 +439,7 @@ function handleEventData(data) {
   Object.values(events).forEach((event) => {
     if (
       event?.type != "play_start_baseball" &&
-      event?.type != "play_over_baseball" &&
-      event?.type != "period_start" &&
+      event?.type != "periodstart" &&
       event?.type != "periodscore" &&
       event?.type != "gumbo_commentary"
     )
@@ -502,20 +514,22 @@ function setMatch() {
   }
   document.getElementById("headerHome").textContent = teamNames["home"];
   document.getElementById("headerAway").textContent = teamNames["away"];
-  if(document.getElementById("homeMember").textContent == "") document.getElementById("homeMember").textContent = teamNames["home"];
-  if(document.getElementById("awayMember").textContent == "") document.getElementById("awayMember").textContent = teamNames["away"];
+  if (document.getElementById("homeMember").textContent == "")
+    document.getElementById("homeMember").textContent = teamNames["home"];
+  if (document.getElementById("awayMember").textContent == "")
+    document.getElementById("awayMember").textContent = teamNames["away"];
   document.getElementById("homeTableName").textContent = tAbbr["home"];
   document.getElementById("awayTableName").textContent = tAbbr["away"];
 
   // H and E
   if (teams?.home?.stats?.hitting_hits?.value) {
-    $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value?.total);
-    $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value?.total);
+    $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value.total);
+    $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value.total);
     $("#homeTableE").text(
-      teams?.home?.stats?.fielding_errors_total?.value?.total
+      teams?.home?.stats?.fielding_errors_total?.value.total
     );
     $("#awayTableE").text(
-      teams?.away?.stats?.fielding_errors_total?.value?.total
+      teams?.away?.stats?.fielding_errors_total?.value.total
     );
   }
 
@@ -622,6 +636,7 @@ function invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xffffff).toString(16).substr(1).toUpperCase();
 }
 function abbrevName(fullName) {
+  if(!fullName) return "";
   var split_names = fullName.trim().split(", ");
   if (split_names.length > 1) {
     return split_names[1].charAt(0) + ". " + split_names[0];
@@ -629,21 +644,28 @@ function abbrevName(fullName) {
   return split_names[0];
 }
 function getName(playerId) {
-  if (homePlayers?.playerId) {
-    let fullName = homePlayers?.playerId?.name;
-    return abbrevName(fullName);
+  if(!playerId) {
+    console.log("empty playerId")
+    return "";
   }
-  if (awayPlayers?.playerId) {
-    let fullName = awayPlayers?.playerId?.name;
-    return abbrevName(fullName);
+  if (homePlayers) {
+    let fullName = homePlayers[playerId]?.name;
+    console.log("fullName from homePlayers: ", fullName);
+    if(fullName) return abbrevName(fullName);
+  }
+  if (awayPlayers) {
+    let fullName = awayPlayers[playerId]?.name;
+    console.log("fullName from awayPlayers: ", fullName);
+    if(fullName) return abbrevName(fullName);
   }
   return "";
 }
-function getString(underlinedString){
+function getString(underlinedString) {
+  if(!underlinedString) return "";
   let split_strings = underlinedString.trim().split("_");
   if (split_strings.length == 0) return underlinedString;
   let resultString = split_strings[0];
-  for (let i = 1; i < split_strings.length; i++){
+  for (let i = 1; i < split_strings.length; i++) {
     resultString = resultString + " " + split_strings[i];
   }
   return resultString;
