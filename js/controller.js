@@ -137,6 +137,7 @@ function stepInitialize() {
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
   if (currentState == lastState) return;
   let cs = gameState[currentState];
+  setCenterFrame(getString(cs?.type), teamNames[cs?.team])
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
@@ -267,6 +268,11 @@ function stepInitialize() {
   }
   if (cs?.batter?.playerid) {
     $("#" + curBat + "Member").text(getName(cs?.batter?.playerid));
+    console.log("batter name");
+  }
+  if (cs?.pitcher?.playerid) {
+    $("#" + curPit + "Member").text(getName(cs?.pitcher?.playerid));
+    console.log("pitcher name");
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -420,6 +426,7 @@ function handleEventData(data) {
     if (
       event?.type != "play_start_baseball" &&
       event?.type != "play_over_baseball" &&
+      event?.type != "player_on_base_x" &&
       event?.type != "gumbo_commentary"
     )
       newEvents.push(event);
@@ -493,8 +500,8 @@ function setMatch() {
   }
   document.getElementById("headerHome").textContent = teamNames["home"];
   document.getElementById("headerAway").textContent = teamNames["away"];
-  document.getElementById("homeMember").textContent = teamNames["home"];
-  document.getElementById("awayMember").textContent = teamNames["away"];
+  if(document.getElementById("homeMember").textContent == "") document.getElementById("homeMember").textContent = teamNames["home"];
+  if(document.getElementById("awayMember").textContent == "") document.getElementById("awayMember").textContent = teamNames["away"];
   document.getElementById("homeTableName").textContent = tAbbr["home"];
   document.getElementById("awayTableName").textContent = tAbbr["away"];
 
@@ -635,7 +642,7 @@ function getString(underlinedString){
   if (split_strings.length == 0) return underlinedString;
   let resultString = split_strings[0];
   for (let i = 1; i < split_strings.length; i++){
-    resultString = resultString + split_strings[i];
+    resultString = resultString + " " + split_strings[i];
   }
   return resultString;
 }
