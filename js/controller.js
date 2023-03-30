@@ -156,11 +156,14 @@ function stepInitialize() {
         if (cs["bases"]["" + i]["occupied"] == false) setBase(i, "");
         else if (cs["bases"]["" + i]["player_id"] == null)
           setBase(i, tAbbr[curBat]);
-        else
-          setBase(
-            i,
-            teams[curBat]?.players?.[cs["bases"]["" + i]["player_id"]]
-          );
+        else {
+          if (curBat == "home" && homePlayers) {
+            setBase(i, abbrevName(homePlayers[cs["bases"]["" + i]["player_id"]]?.name));
+          }
+          if (curBat == "away" && awayPlayers) {
+            setBase(i, abbrevName(awayPlayers[cs["bases"]["" + i]["player_id"]]?.name));
+          }
+        }
       }
     }
   }
@@ -232,7 +235,8 @@ function stepInitialize() {
     currentBattNumber++;
   }
   if (cs["type"] == "gumbo_commentary") {
-    setCenterFrame("Runner Advances", "");
+    // setCenterFrame("Runner Advances", "");
+    console.log("gumbo_commentary")
   }
   if (cs["type"] == "ball_in_play") {
     battingState[currentBattNumber] = "In play";
@@ -241,7 +245,8 @@ function stepInitialize() {
     currentBattNumber++;
   }
   if (cs["type"] == "player_on_base_x") {
-    setCenterFrame("Runner Advances", "");
+    // setCenterFrame("Runner Advances", "");
+    console.log("player_on_base_x")
   }
   if (cs["home"]) {
     // $("#homeTableH").text(cs["home"]["hits"]);
@@ -375,11 +380,15 @@ var gameType = new Array();
 var newEvents = new Array();
 var lastEvents = new Array();
 var awayteamname, hometeamname;
-var homeScore = 0, awayScore = 0, periodlength, getDataTime;
+var homeScore = 0,
+  awayScore = 0,
+  periodlength,
+  getDataTime;
 var teamNames = new Array();
 var periodScoreH = new Array();
 var periodScoreA = new Array();
 const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+var homePlayers, awayPlayers;
 
 function handleEventData(data) {
   if (data.info) {
@@ -387,6 +396,10 @@ function handleEventData(data) {
   }
   if (data["match"]) match = data["match"];
   if (data?.stats_match_stats?.match) match = data?.stats_match_stats?.match;
+  if (data?.stats_match_stats) {
+    homePlayers = data?.stats_match_stats?.match?.teams?.home?.players;
+    awayPlayers = data?.stats_match_stats?.match?.teams?.away?.players;
+  }
 
   var events = data["events"] || {};
 
@@ -492,7 +505,10 @@ function setMatch() {
   let lastperiodscoreA = awayScore;
   if (match["periods"]) {
     for (let i = 1; i <= 9; i++) {
-      if (match["periods"]["p" + i] && match["periods"]["p" + i]["home"] != null) {
+      if (
+        match["periods"]["p" + i] &&
+        match["periods"]["p" + i]["home"] != null
+      ) {
         $("#homeTable" + i).text(match["periods"]["p" + i]["home"]);
         $("#awayTable" + i).text(match["periods"]["p" + i]["away"]);
         lastperiodscoreH -= match["periods"]["p" + i]["home"];
@@ -579,3 +595,10 @@ function order(params) {
 function invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xffffff).toString(16).substr(1).toUpperCase();
 }
+function abbrevName(fullName) {
+  var split_names = fullName.trim().split(", ");
+  if (split_names.length > 1) {
+      return (split_names[1].charAt(0) + ". " + split_names[0]);
+  }
+  return split_names[0];
+};
