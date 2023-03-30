@@ -95,6 +95,7 @@ function max(a, b) {
   return b;
 }
 function setCenterFrame(title, content) {
+  if(title == "unkown") return;
   title = getString(title);
   document.getElementById("center_rect").setAttribute("fill-opacity", 0.5);
   center_text = capitalizeWords(title.split(" ")).join(" ");
@@ -135,7 +136,7 @@ function stepInitialize() {
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
-  if (currentState == lastState) return;
+  // if (currentState == lastState) return;
   let cs = gameState[currentState];
   setCenterFrame(getString(cs?.type), teamNames[cs?.team])
   if (cs["batter_count"]) {
@@ -182,12 +183,12 @@ function stepInitialize() {
     setCenterFrame(cs["advancement_type"], teamNames[curBat]);
   }
   if (cs["type"] == "batter_out") {
-    setCenterFrame("Batter out", "");
-    if (cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
-    if (cs["out_type"] == "fly_out") setCenterFrame("Fly Out", "");
-    if (cs["out_type"] == "line_out") setCenterFrame("Line Out", "");
-    if (cs["out_type"] == "strike_out") setCenterFrame("Strike Out", "");
-    if (cs["out_type"] == "pop_out") setCenterFrame("Pop Out", "");
+    setCenterFrame("Batter out", teamNames[curBat]);
+    if (cs["out_type"] && cs.out_type != 'unkown') setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
+  }
+  if (cs["type"] == "player_out") {
+    setCenterFrame("Player out", "");
+    if (cs["out_type"] && cs.out_type != 'unkown') setCenterFrame(getString(cs?.out_type), "");
   }
   if (cs["type"] == "runner_out") {
     setCenterFrame("Runner out", "");
@@ -426,7 +427,8 @@ function handleEventData(data) {
     if (
       event?.type != "play_start_baseball" &&
       event?.type != "play_over_baseball" &&
-      event?.type != "player_on_base_x" &&
+      event?.type != "period_start" &&
+      event?.type != "periodscore" &&
       event?.type != "gumbo_commentary"
     )
       newEvents.push(event);
