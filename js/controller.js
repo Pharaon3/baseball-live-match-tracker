@@ -95,6 +95,7 @@ function max(a, b) {
   return b;
 }
 function setCenterFrame(title, content) {
+  title = getString(title);
   document.getElementById("center_rect").setAttribute("fill-opacity", 0.5);
   center_text = capitalizeWords(title.split(" ")).join(" ");
   document.getElementById("center_text").textContent = center_text;
@@ -134,6 +135,7 @@ function stepInitialize() {
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
+  if (currentState == lastState) return;
   let cs = gameState[currentState];
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
@@ -158,10 +160,16 @@ function stepInitialize() {
           setBase(i, tAbbr[curBat]);
         else {
           if (curBat == "home" && homePlayers) {
-            setBase(i, abbrevName(homePlayers[cs["bases"]["" + i]["player_id"]]?.name));
+            setBase(
+              i,
+              abbrevName(homePlayers[cs["bases"]["" + i]["player_id"]]?.name)
+            );
           }
           if (curBat == "away" && awayPlayers) {
-            setBase(i, abbrevName(awayPlayers[cs["bases"]["" + i]["player_id"]]?.name));
+            setBase(
+              i,
+              abbrevName(awayPlayers[cs["bases"]["" + i]["player_id"]]?.name)
+            );
           }
         }
       }
@@ -169,8 +177,9 @@ function stepInitialize() {
   }
   if (cs["type"] == "play_start_baseball") {
   }
-  if (cs["advancement_type"] && cs["advancement_type"] != "unkown")
+  if (cs["advancement_type"] && cs["advancement_type"] != "unkown"){
     setCenterFrame(cs["advancement_type"], teamNames[curBat]);
+  }
   if (cs["type"] == "batter_out") {
     setCenterFrame("Batter out", "");
     if (cs["out_type"] == "ground_out") setCenterFrame("Ground Out", "");
@@ -236,7 +245,7 @@ function stepInitialize() {
   }
   if (cs["type"] == "gumbo_commentary") {
     // setCenterFrame("Runner Advances", "");
-    console.log("gumbo_commentary")
+    console.log("gumbo_commentary");
   }
   if (cs["type"] == "ball_in_play") {
     battingState[currentBattNumber] = "In play";
@@ -246,7 +255,7 @@ function stepInitialize() {
   }
   if (cs["type"] == "player_on_base_x") {
     // setCenterFrame("Runner Advances", "");
-    console.log("player_on_base_x")
+    console.log("player_on_base_x");
   }
   if (cs["home"]) {
     // $("#homeTableH").text(cs["home"]["hits"]);
@@ -255,6 +264,9 @@ function stepInitialize() {
   if (cs["away"]) {
     // $("#awayTableH").text(cs["away"]["hits"]);
     // $("#awayTableE").text(cs["away"]["errors"]);
+  }
+  if (cs?.batter?.playerid) {
+    $("#" + curBat + "Member").text(getName(cs?.batter?.playerid));
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -405,7 +417,12 @@ function handleEventData(data) {
 
   var newEvents = new Array();
   Object.values(events).forEach((event) => {
-    newEvents.push(event);
+    if (
+      event?.type != "play_start_baseball" &&
+      event?.type != "play_over_baseball" &&
+      event?.type != "gumbo_commentary"
+    )
+      newEvents.push(event);
   });
   newEvents.forEach((newEvent) => {
     let flag = 1;
@@ -598,7 +615,27 @@ function invertHex(hex) {
 function abbrevName(fullName) {
   var split_names = fullName.trim().split(", ");
   if (split_names.length > 1) {
-      return (split_names[1].charAt(0) + ". " + split_names[0]);
+    return split_names[1].charAt(0) + ". " + split_names[0];
   }
   return split_names[0];
-};
+}
+function getName(playerId) {
+  if (homePlayers?.playerId) {
+    let fullName = homePlayers?.playerId?.name;
+    return abbrevName(fullName);
+  }
+  if (awayPlayers?.playerId) {
+    let fullName = awayPlayers?.playerId?.name;
+    return abbrevName(fullName);
+  }
+  return "";
+}
+function getString(underlinedString){
+  let split_strings = underlinedString.trim().split("_");
+  if (split_strings.length == 0) return underlinedString;
+  let resultString = split_strings[0];
+  for (let i = 1; i < split_strings.length; i++){
+    resultString = resultString + split_strings[i];
+  }
+  return resultString;
+}
