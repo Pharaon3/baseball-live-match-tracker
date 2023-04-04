@@ -41,7 +41,7 @@ function countdown() {
           days + "D " + hour + "H " + minute + "M " + second + "S"
         );
       $("#score").text("0 - 0");
-    } else if (miliseconds > 1000) {
+    } else if (miliseconds > 2000) {
       stepInitialize();
       miliseconds = 0;
     }
@@ -135,8 +135,8 @@ function stepInitialize() {
   let lastState = currentState;
   currentState = max(currentState + 1, gameState.length - 10);
   currentState = min(currentState, gameState.length - 1);
+  if (currentState == lastState) return;
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
-  // if (currentState == lastState) return;
   let cs = gameState[currentState];
   if (cs?.type != "play_over_baseball" && cs?.type != "player_on_base_x")
     setCenterFrame(getString(cs?.type), teamNames[cs?.team]);
@@ -225,6 +225,7 @@ function stepInitialize() {
   }
   $("#innerBall").attr("fill-opacity", 0);
   $("#roundBall").attr("fill-opacity", 0);
+  $("#rectBallId").text("");
   if (cs["type"] == "ball") {
     battingState[currentBattNumber] = "Ball";
     $("#roundBall").attr("fill-opacity", 0.5);
@@ -237,6 +238,7 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", "#f00");
     currentBattNumber++;
+    $("#rectBallId").text(currentBattNumber);
   }
   if (cs["type"] == "strike") {
     battingState[currentBattNumber] = "Strike";
