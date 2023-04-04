@@ -138,7 +138,14 @@ function stepInitialize() {
   if (currentState == lastState) return;
   if (!isLimitedCov && currentState != lastState) resetCenterFrame();
   let cs = gameState[currentState];
-  if (cs?.type != "play_over_baseball" && cs?.type != "player_on_base_x")
+  if (
+    cs?.type != "play_over_baseball" &&
+    cs?.type != "player_on_base_x" &&
+    cs?.type != "ball" &&
+    cs?.type != "strike" &&
+    cs?.type != "ball_in_play" &&
+    cs?.type != "foul_ball"
+  )
     setCenterFrame(getString(cs?.type), teamNames[cs?.team]);
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
@@ -225,12 +232,14 @@ function stepInitialize() {
   }
   $("#innerBall").attr("fill-opacity", 0);
   $("#roundBall").attr("fill-opacity", 0);
-  $("#rectBallId").text("");
+  $("#rectBallId1").text("");
+  $("#rectBallId2").text("");
   if (cs["type"] == "ball") {
     battingState[currentBattNumber] = "Ball";
     $("#roundBall").attr("fill-opacity", 0.5);
     $("#roundBall").attr("fill", "#0f0");
     currentBattNumber++;
+    $("#rectBallId1").text(currentBattNumber);
   }
   if (cs["type"] == "foul_ball") {
     battingState[currentBattNumber] = "Foul";
@@ -238,7 +247,7 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", "#f00");
     currentBattNumber++;
-    $("#rectBallId").text(currentBattNumber);
+    $("#rectBallId2").text(currentBattNumber);
   }
   if (cs["type"] == "strike") {
     battingState[currentBattNumber] = "Strike";
@@ -249,6 +258,7 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", "#f00");
     currentBattNumber++;
+    $("#rectBallId2").text(currentBattNumber);
   }
   if (cs["type"] == "gumbo_commentary") {
     // setCenterFrame("Runner Advances", "");
@@ -259,6 +269,7 @@ function stepInitialize() {
     $("#innerBall").attr("fill-opacity", 0.5);
     $("#innerBall").attr("fill", "#00f");
     currentBattNumber++;
+    $("#rectBallId2").text(currentBattNumber);
   }
   if (cs["type"] == "player_on_base_x") {
     // setCenterFrame("Runner Advances", "");
@@ -273,19 +284,19 @@ function stepInitialize() {
     // $("#awayTableE").text(cs["away"]["errors"]);
   }
   if (cs?.batter?.playerid && getName(cs?.batter?.playerid)) {
-    if(curBat == "home"){
+    if (curBat == "home") {
       $("#homeMember").text(getName(cs?.batter?.playerid));
     }
-    if(curBat == "away"){
+    if (curBat == "away") {
       $("#awayMember").text(getName(cs?.batter?.playerid));
     }
     console.log("batter name", getName(cs?.batter?.playerid));
   }
   if (cs?.pitcher?.playerid && getName(cs?.pitcher?.playerid)) {
-    if(curPit == "home"){
+    if (curPit == "home") {
       $("#homeMember").text(getName(cs?.pitcher?.playerid));
     }
-    if(curPit == "away"){
+    if (curPit == "away") {
       $("#awayMember").text(getName(cs?.pitcher?.playerid));
     }
     console.log("pitcher name", getName(cs?.pitcher?.playerid));
@@ -613,13 +624,13 @@ function setMatch() {
   }
   // Batting or Pitching
   if (match["livestate"]) {
-    if (match["livestate"]["batter"]["team"] == "home") {
+    if (match?.livestate?.batter?.team == "home") {
       $("#homeRole").text("BATTER");
       $("#awayRole").text("PITCHER");
       curBat = "home";
       curPit = "away";
     }
-    if (match["livestate"]["batter"]["team"] == "away") {
+    if (match?.livestate?.batter?.team == "away") {
       $("#awayRole").text("BATTER");
       $("#homeRole").text("PITCHER");
       curBat = "away";
@@ -638,7 +649,7 @@ function invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xffffff).toString(16).substr(1).toUpperCase();
 }
 function abbrevName(fullName) {
-  if(!fullName) return "";
+  if (!fullName) return "";
   var split_names = fullName.trim().split(", ");
   if (split_names.length > 1) {
     return split_names[1].charAt(0) + ". " + split_names[0];
@@ -646,24 +657,24 @@ function abbrevName(fullName) {
   return split_names[0];
 }
 function getName(playerId) {
-  if(!playerId) {
-    console.log("empty playerId")
+  if (!playerId) {
+    console.log("empty playerId");
     return "";
   }
   if (homePlayers) {
     let fullName = homePlayers[playerId]?.name;
     console.log("fullName from homePlayers: ", fullName);
-    if(fullName) return abbrevName(fullName);
+    if (fullName) return abbrevName(fullName);
   }
   if (awayPlayers) {
     let fullName = awayPlayers[playerId]?.name;
     console.log("fullName from awayPlayers: ", fullName);
-    if(fullName) return abbrevName(fullName);
+    if (fullName) return abbrevName(fullName);
   }
   return "";
 }
 function getString(underlinedString) {
-  if(!underlinedString) return "";
+  if (!underlinedString) return "";
   let split_strings = underlinedString.trim().split("_");
   if (split_strings.length == 0) return underlinedString;
   let resultString = split_strings[0];
