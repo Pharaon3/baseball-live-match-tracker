@@ -15,6 +15,8 @@ var curBat, curPit;
 var tAbbr = new Array();
 var currentBattNumber;
 var isLimitedCov = false;
+var atbatNumber = 0;
+var overAtBat = {number: 0, pitchnumber: 0}
 
 function countdown() {
   var interval = setInterval(function () {
@@ -144,17 +146,23 @@ function stepInitialize() {
     cs?.type != "ball" &&
     cs?.type != "strike" &&
     cs?.type != "ball_in_play" &&
-    cs?.type != "foul_ball"
+    cs?.type != "foul_ball" &&
+    cs?.atbat != overAtBat
   )
     setCenterFrame(getString(cs?.type), teamNames[cs?.team]);
   if (cs["batter_count"]) {
     setBatterBall(cs["batter_count"]["balls"]);
     setBatterStrike(cs["batter_count"]["strikes"]);
     setBatterOuts(cs["batter_count"]["outs"]);
-    let batter_count =
-      cs["batter_count"]["balls"] + cs["batter_count"]["strikes"];
+  }
+  if(cs?.atbat){
+    if(atbatNumber != cs?.atbat?.number) {
+      for (let i = 0; i < 20; i++) battingState[i] = "";
+    }
+    atbatNumber = cs?.atbat?.number
+    let batter_count = cs?.atbat?.pitchnumber;
     for (let i = batter_count; i < 20; i++) battingState[i] = "";
-    currentBattNumber = min(currentBattNumber, batter_count - 1);
+    currentBattNumber = min(currentBattNumber, batter_count);
     currentBattNumber = max(currentBattNumber, 0);
   }
   if (cs["type"] == "play_start_baseball") {
@@ -184,26 +192,17 @@ function stepInitialize() {
         }
       }
     }
+    overAtBat = cs?.atbat;
   }
   if (cs["type"] == "play_start_baseball") {
   }
-  if (cs["advancement_type"] && cs["advancement_type"] != "unkown") {
+  if (
+    cs["advancement_type"] &&
+    cs["advancement_type"] != "unkown" &&
+    cs["advancement_type"] != "no_advancement" && 
+    cs?.atbat != overAtBat
+  ) {
     setCenterFrame(cs["advancement_type"], teamNames[curBat]);
-  }
-  if (cs["type"] == "batter_out") {
-    setCenterFrame("Batter out", teamNames[curBat]);
-    if (cs["out_type"] && cs.out_type != "unkown")
-      setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
-  }
-  if (cs["type"] == "player_out") {
-    setCenterFrame("Player out", "");
-    if (cs["out_type"] && cs.out_type != "unkown")
-      setCenterFrame(getString(cs?.out_type), "");
-  }
-  if (cs["type"] == "runner_out") {
-    setCenterFrame("Runner out", "");
-    if (cs["out_type"] == "caught_stealing")
-      setCenterFrame("Caught stealing", "");
   }
   if (cs["type"] == "half_inning_start") {
     resetBattingState();
@@ -221,59 +220,76 @@ function stepInitialize() {
       setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
     }
   }
-  if (cs["type"] == "runners_in_motion") {
-    setCenterFrame("Runner in motion", "");
-  }
-  if (cs["type"] == "runner_checked") {
-    setCenterFrame(cs["name"], "");
-  }
-  if (cs["type"] == "run_scored") {
-    setCenterFrame("Run scored", "");
-  }
-  $("#innerBall").attr("fill-opacity", 0);
-  $("#roundBall").attr("fill-opacity", 0);
-  $("#rectBallId1").text("");
-  $("#rectBallId2").text("");
-  if (cs["type"] == "ball") {
-    battingState[currentBattNumber] = "Ball";
-    $("#roundBall").attr("fill-opacity", 0.5);
-    $("#roundBall").attr("fill", "#0f0");
-    currentBattNumber++;
-    $("#rectBallId1").text(currentBattNumber);
-  }
-  if (cs["type"] == "foul_ball") {
-    battingState[currentBattNumber] = "Foul";
-    if (cs["name"] == "Foul ball") battingState[currentBattNumber] = "Foul";
-    $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", "#f00");
-    currentBattNumber++;
-    $("#rectBallId2").text(currentBattNumber);
-  }
-  if (cs["type"] == "strike") {
-    battingState[currentBattNumber] = "Strike";
-    // "strike_type": "foul_ball"
-    if (cs["strike_type"] == "foul_ball") {
-      battingState[currentBattNumber] = "Foul";
+  if(cs?.atbat !== overAtBat){
+    if (cs["type"] == "batter_out") {
+      setCenterFrame("Batter out", teamNames[curBat]);
+      if (cs["out_type"] && cs.out_type != "unkown")
+        setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
     }
-    $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", "#f00");
-    currentBattNumber++;
-    $("#rectBallId2").text(currentBattNumber);
-  }
-  if (cs["type"] == "gumbo_commentary") {
-    // setCenterFrame("Runner Advances", "");
-    console.log("gumbo_commentary");
-  }
-  if (cs["type"] == "ball_in_play") {
-    battingState[currentBattNumber] = "In play";
-    $("#innerBall").attr("fill-opacity", 0.5);
-    $("#innerBall").attr("fill", "#00f");
-    currentBattNumber++;
-    $("#rectBallId2").text(currentBattNumber);
-  }
-  if (cs["type"] == "player_on_base_x") {
-    // setCenterFrame("Runner Advances", "");
-    console.log("player_on_base_x");
+    if (cs["type"] == "player_out") {
+      setCenterFrame("Player out", "");
+      if (cs["out_type"] && cs.out_type != "unkown")
+        setCenterFrame(getString(cs?.out_type), "");
+    }
+    if (cs["type"] == "runner_out") {
+      setCenterFrame("Runner out", "");
+      if (cs["out_type"] == "caught_stealing")
+        setCenterFrame("Caught stealing", "");
+    }
+    if (cs["type"] == "runners_in_motion") {
+      setCenterFrame("Runner in motion", "");
+    }
+    if (cs["type"] == "runner_checked") {
+      setCenterFrame(cs["name"], "");
+    }
+    if (cs["type"] == "run_scored") {
+      setCenterFrame("Run scored", "");
+    }
+    $("#innerBall").attr("fill-opacity", 0);
+    $("#roundBall").attr("fill-opacity", 0);
+    $("#rectBallId1").text("");
+    $("#rectBallId2").text("");
+    if (cs["type"] == "ball") {
+      battingState[currentBattNumber] = "Ball";
+      $("#roundBall").attr("fill-opacity", 0.5);
+      $("#roundBall").attr("fill", "#0f0");
+      currentBattNumber++;
+      $("#rectBallId1").text(currentBattNumber);
+    }
+    if (cs["type"] == "foul_ball") {
+      battingState[currentBattNumber] = "Foul";
+      if (cs["name"] == "Foul ball") battingState[currentBattNumber] = "Foul";
+      $("#innerBall").attr("fill-opacity", 0.5);
+      $("#innerBall").attr("fill", "#f00");
+      currentBattNumber++;
+      $("#rectBallId2").text(currentBattNumber);
+    }
+    if (cs["type"] == "strike") {
+      battingState[currentBattNumber] = "Strike";
+      // "strike_type": "foul_ball"
+      if (cs["strike_type"] == "foul_ball") {
+        battingState[currentBattNumber] = "Foul";
+      }
+      $("#innerBall").attr("fill-opacity", 0.5);
+      $("#innerBall").attr("fill", "#f00");
+      currentBattNumber++;
+      $("#rectBallId2").text(currentBattNumber);
+    }
+    if (cs["type"] == "gumbo_commentary") {
+      setCenterFrame(cs?.commentary, "");
+      // console.log("gumbo_commentary");
+    }
+    if (cs["type"] == "ball_in_play") {
+      battingState[currentBattNumber] = "In play";
+      $("#innerBall").attr("fill-opacity", 0.5);
+      $("#innerBall").attr("fill", "#00f");
+      currentBattNumber++;
+      $("#rectBallId2").text(currentBattNumber);
+    }
+    if (cs["type"] == "player_on_base_x") {
+      // setCenterFrame("Runner Advances", "");
+      // console.log("player_on_base_x");
+    }
   }
   if (cs["home"]) {
     // $("#homeTableH").text(cs["home"]["hits"]);
@@ -290,7 +306,7 @@ function stepInitialize() {
     if (curBat == "away") {
       $("#awayMember").text(getName(cs?.batter?.playerid));
     }
-    console.log("batter name", getName(cs?.batter?.playerid));
+    // console.log("batter name", getName(cs?.batter?.playerid));
   }
   if (cs?.pitcher?.playerid && getName(cs?.pitcher?.playerid)) {
     if (curPit == "home") {
@@ -299,7 +315,7 @@ function stepInitialize() {
     if (curPit == "away") {
       $("#awayMember").text(getName(cs?.pitcher?.playerid));
     }
-    console.log("pitcher name", getName(cs?.pitcher?.playerid));
+    // console.log("pitcher name", getName(cs?.pitcher?.playerid));
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -453,8 +469,7 @@ function handleEventData(data) {
     if (
       event?.type != "play_start_baseball" &&
       event?.type != "periodstart" &&
-      event?.type != "periodscore" &&
-      event?.type != "gumbo_commentary"
+      event?.type != "periodscore"
     )
       newEvents.push(event);
   });
@@ -609,7 +624,7 @@ function setMatch() {
     );
 
     matchStartDate = date.getTime();
-  } else matchStartDate = null;
+  } else if (match?.status) matchStartDate = null;
   if (match["p"] >= 31 && match["p"] <= 39) {
     setCenterFrame("End of inning", homeScore + " : " + awayScore);
     $("#period").text(order(match["p"] % 10));
@@ -640,10 +655,10 @@ function setMatch() {
 }
 
 function order(params) {
-  if (params == 1) return "1st";
-  if (params == 2) return "2nd";
-  if (params == 3) return "3rd";
-  return params + "th";
+  if (params == 1) return "1st inning";
+  if (params == 2) return "2nd inning";
+  if (params == 3) return "3rd inning";
+  return params + "th inning";
 }
 function invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xffffff).toString(16).substr(1).toUpperCase();
@@ -658,17 +673,17 @@ function abbrevName(fullName) {
 }
 function getName(playerId) {
   if (!playerId) {
-    console.log("empty playerId");
+    // console.log("empty playerId");
     return "";
   }
   if (homePlayers) {
     let fullName = homePlayers[playerId]?.name;
-    console.log("fullName from homePlayers: ", fullName);
+    // console.log("fullName from homePlayers: ", fullName);
     if (fullName) return abbrevName(fullName);
   }
   if (awayPlayers) {
     let fullName = awayPlayers[playerId]?.name;
-    console.log("fullName from awayPlayers: ", fullName);
+    // console.log("fullName from awayPlayers: ", fullName);
     if (fullName) return abbrevName(fullName);
   }
   return "";
