@@ -17,6 +17,7 @@ var currentBattNumber;
 var isLimitedCov = false;
 var atbatNumber = 0;
 var overAtBat = { number: 0, pitchnumber: 0 };
+var isMiddleOfTheInning = false;
 
 function countdown() {
   var interval = setInterval(function () {
@@ -64,6 +65,9 @@ function countdown() {
         if ($("#center_text").text != "End Of Inning")
           setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
       }
+    }
+    if (isMiddleOfTheInning) {
+      setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
     }
   }, timeInterval);
 }
@@ -235,14 +239,17 @@ function stepInitialize() {
       setCenterFrame("End of inning", homeScore + " : " + awayScore);
       $("#period").text(order(match["p"] % 10));
     } else {
-      if ($("#center_text").text != "End Of Inning")
+      if ($("#center_text").text != "End Of Inning"){
         setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
+        isMiddleOfTheInning = true;
+      }
     }
   }
   if (
     cs?.atbat?.number != overAtBat?.number ||
     cs?.atbat?.pitchnumber != overAtBat?.pitchnumber
   ) {
+    if(cs?.atbat) isMiddleOfTheInning = false;
     console.log("cs?.atbat", cs?.atbat);
     console.log("overAtBat", overAtBat);
     if (cs["type"] == "batter_out") {
@@ -475,18 +482,28 @@ function setBattingState() {
   });
   if (totalBattingNumber < 6) {
     for (let i = 1; i < 7; i++) {
-      $("#overNumber" + i).attr("x", -20 + i * 40);
-      $("#overState" + i).attr("x", -20 + i * 40);
+      $("#overNumber" + i).attr("x", -28 + i * 55);
+      $("#overState" + i).attr("x", -28 + i * 55);
+      $("#overNumber" + i).attr("font-size", 20);
+      $("#overState" + i).attr("font-size", 20);
     }
   } else {
     for (let i = 1; i <= totalBattingNumber; i++) {
       $("#overNumber" + i).attr(
         "x",
-        20 + ((i - 1) * 230) / (totalBattingNumber - 1)
+        27 + ((i - 1) * 330) / (totalBattingNumber - 1)
       );
       $("#overState" + i).attr(
         "x",
-        20 + ((i - 1) * 230) / (totalBattingNumber - 1)
+        27 + ((i - 1) * 330) / (totalBattingNumber - 1)
+      );
+      $("#overNumber" + i).attr(
+        "font-size",
+        26 - totalBattingNumber
+      );
+      $("#overState" + i).attr(
+        "font-size",
+        26 - totalBattingNumber
       );
     }
   }
