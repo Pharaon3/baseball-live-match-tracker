@@ -16,7 +16,8 @@ var tAbbr = new Array();
 var currentBattNumber;
 var isLimitedCov = false;
 var atbatNumber = 0;
-var overAtBat = { number: 0, pitchnumber: 0 };
+// var overAtBat = { number: 0, pitchnumber: 0 };
+var overAtBat;
 var isMiddleOfTheInning = false;
 
 function countdown() {
@@ -169,7 +170,7 @@ function stepInitialize() {
     cs?.type != "ball_in_play" &&
     cs?.type != "gumbo_commentary" &&
     cs?.type != "foul_ball" &&
-    cs?.atbat != overAtBat
+    ((cs?.atbat != overAtBat && overAtBat) || !overAtBat)
   )
     setCenterFrame(getString(cs?.type), teamNames[cs?.team]);
   if (cs["batter_count"]) {
@@ -239,7 +240,7 @@ function stepInitialize() {
       setCenterFrame("End of inning", homeScore + " : " + awayScore);
       $("#period").text(order(match["p"] % 10));
     } else {
-      if ($("#center_text").text != "End Of Inning"){
+      if ($("#center_text").text != "End Of Inning") {
         setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
         isMiddleOfTheInning = true;
       }
@@ -247,11 +248,10 @@ function stepInitialize() {
   }
   if (
     cs?.atbat?.number != overAtBat?.number ||
-    cs?.atbat?.pitchnumber != overAtBat?.pitchnumber
+    cs?.atbat?.pitchnumber != overAtBat?.pitchnumber ||
+    !overAtBat
   ) {
-    if(cs?.atbat) isMiddleOfTheInning = false;
-    console.log("cs?.atbat", cs?.atbat);
-    console.log("overAtBat", overAtBat);
+    if (cs?.atbat) isMiddleOfTheInning = false;
     if (cs["type"] == "batter_out") {
       setCenterFrame("Batter out", teamNames[curBat]);
       if (cs["out_type"] && cs.out_type != "unkown")
@@ -497,14 +497,8 @@ function setBattingState() {
         "x",
         27 + ((i - 1) * 330) / (totalBattingNumber - 1)
       );
-      $("#overNumber" + i).attr(
-        "font-size",
-        26 - totalBattingNumber
-      );
-      $("#overState" + i).attr(
-        "font-size",
-        26 - totalBattingNumber
-      );
+      $("#overNumber" + i).attr("font-size", 26 - totalBattingNumber);
+      $("#overState" + i).attr("font-size", 26 - totalBattingNumber);
     }
   }
   for (let i = totalBattingNumber + 1; i <= 20; i++) {
