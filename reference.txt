@@ -48,3 +48,103 @@ type: "run_scored"
 type: "half_inning_start"		this time MIDDLE OF THE INNING
 
 in play : center blue rect
+
+///////////////////////////////////////////////////////////////////////////////////
+
+USA
+a single event occures between "play_start_baseball" and "play_over_baseball".
+"atbat": { "number": 2, "pitchnumber": 2 }, It's important.
+
+
+
+Global
+if advancement_type == "unkown", no need to show.
+next time, there will be an accurate data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+0
+: 
+advancement_type
+: 
+"single"
+base_loadout
+: 
+{1: true, 2: false, 3: false}
+batter_count
+: 
+{balls: 0, strikes: 0, outs: 0, pcount: 0, errors: 0}
+disabled
+: 
+0
+injurytime
+: 
+0
+matchid
+: 
+38917045
+name
+: 
+"Batter advances to base X"
+runner
+: 
+{starting_base: 0, ending_base: 1}
+seconds
+: 
+12060
+team
+: 
+"home"
+time
+: 
+201
+type
+: 
+"batter_advances_to_base_x"
+updated_uts
+: 
+1681215708
+uts
+: 
+1681215708
+_dc
+: 
+false
+_doc
+: 
+"event"
+_id
+: 
+1425388513
+_rcid
+: 
+211
+_scoutid
+: 
+"5611488909-1727"
+_sid
+: 
+3
+_tid
+: 
+2099
+_typeid
+: 
+"1727"
