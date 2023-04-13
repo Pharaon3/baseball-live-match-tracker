@@ -97,7 +97,6 @@ setInterval(function () {
     connect();
   }
 }, 4000);
-
 function max(a, b) {
   if (a > b) return a;
   return b;
@@ -201,18 +200,22 @@ function stepInitialize() {
   }
   if (
     cs["advancement_type"] &&
-    cs["advancement_type"] != "unkown" &&
+    cs["advancement_type"] != "unknown" &&
     cs["advancement_type"] != "no_advancement" &&
     cs["advancement_type"] != "other_advance" &&
     cs?.atbat !== overAtBat
   ) {
     setCenterFrame(getString(cs["advancement_type"]), teamNames[curBat]);
   }
-  if (cs["advancement_type"] == "unkown" && cs?.runner) {
+  if (cs["advancement_type"] == "unknown" && cs?.runner) {
     setCenterFrame(
       getAdvancement(cs?.runner?.ending_base - cs?.runner?.starting_base),
       teamNames[curBat]
     );
+  }
+  if (cs?.advancement_type) {
+    resetBattingState();
+    currentBattNumber = 0;
   }
   if (cs["type"] == "half_inning_start") {
     resetState();
@@ -233,30 +236,36 @@ function stepInitialize() {
   ) {
     if (cs?.atbat) isMiddleOfTheInning = false;
     if (cs["type"] == "batter_out") {
-      if (cs["out_type"] && cs.out_type != "unkown")
+      if (cs["out_type"] && cs.out_type != "unknown")
         setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
       else setCenterFrame("Batter out", teamNames[curBat]);
+      resetBattingState();
     }
     if (cs["type"] == "player_out") {
-      if (cs["out_type"] && cs.out_type != "unkown")
+      if (cs["out_type"] && cs.out_type != "unknown")
         setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
       else setCenterFrame("Player out", teamNames[curBat]);
+      resetBattingState();
     }
     if (cs["type"] == "runner_out") {
-      if (cs["out_type"] && cs.out_type != "unkown")
+      if (cs["out_type"] && cs.out_type != "unknown")
         setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
       else setCenterFrame("Runner out", teamNames[curBat]);
+      resetBattingState();
     }
     if (cs["type"] == "runners_in_motion") {
       setCenterFrame("Runner in motion", teamNames[curBat]);
     }
     if (cs["type"] == "runner_checked") {
-      if(cs?.runner?.playerid) setCenterFrame(cs?.name, getName(cs?.runner?.playerid));
+      if (cs?.runner?.playerid)
+        setCenterFrame(cs?.name, getName(cs?.runner?.playerid));
       else setCenterFrame(cs["name"], "");
     }
     if (cs["type"] == "run_scored") {
-      if(cs?.runner?.playerid) setCenterFrame(getString(cs?.run_type), getName(cs?.runner?.playerid));
+      if (cs?.runner?.playerid)
+        setCenterFrame(getString(cs?.run_type), getName(cs?.runner?.playerid));
       else setCenterFrame(getString(cs?.run_type), teamNames[curBat]);
+      resetBattingState();
     }
     $("#innerBall").attr("fill-opacity", 0);
     $("#roundBall").attr("fill-opacity", 0);
@@ -296,7 +305,7 @@ function stepInitialize() {
         }
         currentBattNumber = cs?.atbat?.pitchnumber;
       } else {
-        battingState[currentBattNumber] = "Foul";
+        battingState[currentBattNumber] = "Strike";
         if (cs["strike_type"] == "foul_ball") {
           battingState[currentBattNumber] = "Foul";
         }
@@ -326,6 +335,8 @@ function stepInitialize() {
         currentBattNumber++;
       }
       $("#rectBallId2").text(currentBattNumber);
+      resetBattingState();
+      currentBattNumber = 0;
     }
   }
   if (cs?.batter?.playerid && getName(cs?.batter?.playerid)) {
@@ -335,7 +346,6 @@ function stepInitialize() {
     if (curBat == "away") {
       $("#awayMember").text(getName(cs?.batter?.playerid));
     }
-    // console.log("batter name", getName(cs?.batter?.playerid));
   }
   if (cs?.pitcher?.playerid && getName(cs?.pitcher?.playerid)) {
     if (curPit == "home") {
@@ -344,10 +354,10 @@ function stepInitialize() {
     if (curPit == "away") {
       $("#awayMember").text(getName(cs?.pitcher?.playerid));
     }
-    // console.log("pitcher name", getName(cs?.pitcher?.playerid));
   }
-  if(cs?.playerid && cs?.player_type && getName(cs?.playerid)){
-    if(cs?.player_type == "batter" || cs?.player_type == "runner") $("#" + curBat + "Member").text(getName(cs?.playerid))
+  if (cs?.playerid && cs?.player_type && getName(cs?.playerid)) {
+    if (cs?.player_type == "batter" || cs?.player_type == "runner")
+      $("#" + curBat + "Member").text(getName(cs?.playerid));
   }
 }
 function setBase(baseNumber, baseMember) {
@@ -441,20 +451,20 @@ function setBattingState() {
       $("#overState" + i).attr("x", -28 + i * 55);
       $("#overNumber" + i).attr("font-size", 20);
       $("#overState" + i).attr("font-size", 20);
+      $("#overGroup").attr("transform", "translate(460, 150)")
+      $("#overBackground").attr("width", "330")
     }
   } else {
     for (let i = 1; i <= totalBattingNumber; i++) {
-      $("#overNumber" + i).attr(
-        "x",
-        27 + ((i - 1) * 330) / (totalBattingNumber - 1)
-      );
-      $("#overState" + i).attr(
-        "x",
-        27 + ((i - 1) * 330) / (totalBattingNumber - 1)
-      );
-      $("#overNumber" + i).attr("font-size", 26 - totalBattingNumber);
-      $("#overState" + i).attr("font-size", 26 - totalBattingNumber);
+        $("#overNumber" + i).attr("x", -28 + i * 55);
+        $("#overState" + i).attr("x", -28 + i * 55);
+        $("#overNumber" + i).attr("font-size", 20);
+        $("#overState" + i).attr("font-size", 20);
     }
+    let overGroupX = 460 - 55 * (totalBattingNumber - 6)
+    let overBackground = 330 + 55 * (totalBattingNumber - 6)
+    $("#overGroup").attr("transform", "translate(" + overGroupX + ", 150)")
+    $("#overBackground").attr("width", overBackground)
   }
   for (let i = totalBattingNumber + 1; i <= 20; i++) {
     $("#overNumber" + i).text("");
@@ -484,7 +494,6 @@ const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 var homePlayers, awayPlayers;
 
 function handleEventData(data) {
-  console.log("handleEventData")
   if (data.info) {
     handleInfoData(data);
   }
@@ -633,6 +642,11 @@ function setMatch() {
     $("#period").text("Ended");
     resetState();
   }
+  if (match?.status?.name == "AET") {
+    setCenterFrame("Match End", homeScore + " : " + awayScore);
+    $("#period").text("Ended");
+    resetState();
+  }
   if (match?.status?.name == "Break") {
     setCenterFrame("Break", homeScore + " : " + awayScore);
     $("#period").text("Break");
@@ -702,17 +716,14 @@ function abbrevName(fullName) {
 }
 function getName(playerId) {
   if (!playerId) {
-    // console.log("empty playerId");
     return "";
   }
   if (homePlayers) {
     let fullName = homePlayers[playerId]?.name;
-    // console.log("fullName from homePlayers: ", fullName);
     if (fullName) return abbrevName(fullName);
   }
   if (awayPlayers) {
     let fullName = awayPlayers[playerId]?.name;
-    // console.log("fullName from awayPlayers: ", fullName);
     if (fullName) return abbrevName(fullName);
   }
   return "";
@@ -739,7 +750,11 @@ function resetState() {
   setBase(1, "");
   setBase(2, "");
   setBase(3, "");
-  setBatterBall(0)
-  setBatterStrike(0)
-  setBatterOuts(0)
+  setBatterBall(0);
+  setBatterStrike(0);
+  setBatterOuts(0);
+  $("#innerBall").attr("fill-opacity", 0);
+  $("#roundBall").attr("fill-opacity", 0);
+  $("#rectBallId1").text("");
+  $("#rectBallId2").text("");
 }
