@@ -4,7 +4,7 @@ var miliseconds = 0;
 var currentState = 0;
 var gameState = new Array();
 var matchStartDate;
-var match;
+var match, match_stats;
 var innings;
 var bestofsets;
 var socketLastResponseTime;
@@ -203,7 +203,7 @@ function stepInitialize() {
     cs["advancement_type"] != "unknown" &&
     cs["advancement_type"] != "no_advancement" &&
     cs["advancement_type"] != "other_advance" &&
-    cs?.atbat !== overAtBat
+    (cs?.atbat !== overAtBat || !overAtBat)
   ) {
     setCenterFrame(getString(cs["advancement_type"]), teamNames[curBat]);
   }
@@ -219,32 +219,24 @@ function stepInitialize() {
   }
   if (cs["type"] == "half_inning_start") {
     resetState();
-    if (match["p"] >= 31 && match["p"] <= 39) {
-      setCenterFrame("End of inning", homeScore + " : " + awayScore);
-      $("#period").text(order(match["p"] % 10));
-    } else {
-      if ($("#center_text").text != "End Of Inning") {
-        setCenterFrame("MIDDLE OF THE INNING", homeScore + " : " + awayScore);
-        isMiddleOfTheInning = true;
-      }
-    }
   }
-  if (
-    cs?.atbat?.number != overAtBat?.number ||
-    cs?.atbat?.pitchnumber != overAtBat?.pitchnumber ||
-    !overAtBat
+  if ( 1
+    // cs?.atbat?.number != overAtBat?.number ||
+    // cs?.atbat?.pitchnumber != overAtBat?.pitchnumber ||
+    // !overAtBat
   ) {
-    if (cs?.atbat) isMiddleOfTheInning = false;
     if (cs["type"] == "batter_out") {
       if (cs["out_type"] && cs.out_type != "unknown")
         setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
       else setCenterFrame("Batter out", teamNames[curBat]);
       resetBattingState();
+      currentBattNumber = 0;
     }
     if (cs["type"] == "player_out") {
       if (cs["out_type"] && cs.out_type != "unknown")
         setCenterFrame(getString(cs?.out_type), teamNames[curBat]);
       else setCenterFrame("Player out", teamNames[curBat]);
+      if (cs?.player_type && cs?.player_type != "unknown") setCenterFrame(cs?.player_type + " out", teamNames[curBat]);
       resetBattingState();
     }
     if (cs["type"] == "runner_out") {
@@ -314,6 +306,7 @@ function stepInitialize() {
       $("#rectBallId2").text(currentBattNumber);
     }
     if (cs["type"] == "gumbo_commentary") {
+      console.log("commentary")
       if (cs?.commentary?.length > 40) {
         $("#commentary_text").text(cs?.commentary?.substr(0, 38) + "...");
       } else {
@@ -325,16 +318,17 @@ function stepInitialize() {
       $("#commentary_rect").attr("fill-opacity", 0);
     }
     if (cs["type"] == "ball_in_play") {
-      $("#innerBall").attr("fill-opacity", 0.5);
-      $("#innerBall").attr("fill", "#00f");
-      if (cs?.atbat?.pitchnumber) {
-        battingState[cs?.atbat?.pitchnumber - 1] = "In play";
-        currentBattNumber = cs?.atbat?.pitchnumber;
-      } else {
-        battingState[currentBattNumber] = "In play";
-        currentBattNumber++;
-      }
-      $("#rectBallId2").text(currentBattNumber);
+      // $("#innerBall").attr("fill-opacity", 0.5);
+      // $("#innerBall").attr("fill", "#00f");
+      // if (cs?.atbat?.pitchnumber) {
+      //   battingState[cs?.atbat?.pitchnumber - 1] = "In play";
+      //   currentBattNumber = cs?.atbat?.pitchnumber;
+      // } else {
+      //   battingState[currentBattNumber] = "In play";
+      //   currentBattNumber++;
+      // }
+      // $("#rectBallId2").text(currentBattNumber);
+      setCenterFrame("In Play", "")
       resetBattingState();
       currentBattNumber = 0;
     }
@@ -466,12 +460,16 @@ function setBattingState() {
     $("#overGroup").attr("transform", "translate(" + overGroupX + ", 150)")
     $("#overBackground").attr("width", overBackground)
   }
+  for (let i = 1; i <= totalBattingNumber; i ++) {
+    if(battingState[i - 1] == "") $("#overState" + i).text("-");
+  }
   for (let i = totalBattingNumber + 1; i <= 20; i++) {
     $("#overNumber" + i).text("");
     $("#overState" + i).text("");
   }
 }
 function resetBattingState() {
+  currentBattNumber = 0;
   for (let i = 0; i < 20; i++) {
     battingState[i] = "";
     totalBattingNumber = 1;
@@ -501,6 +499,7 @@ function handleEventData(data) {
   if (data?.info?.match) match = data?.info?.match;
   // if (data?.stats_match_stats?.match) match = data?.stats_match_stats?.match;
   if (data?.stats_match_stats) {
+    match_stats = data?.stats_match_stats?.match;
     homePlayers = data?.stats_match_stats?.match?.teams?.home?.players;
     awayPlayers = data?.stats_match_stats?.match?.teams?.away?.players;
   }
@@ -593,14 +592,14 @@ function setMatch() {
   document.getElementById("awayTableName").textContent = tAbbr["away"];
 
   // H and E
-  if (teams?.home?.stats?.hitting_hits?.value) {
-    $("#homeTableH").text(teams?.home?.stats?.hitting_hits?.value.total);
-    $("#awayTableH").text(teams?.away?.stats?.hitting_hits?.value.total);
+  if (match_stats?.teams?.home?.stats?.hitting_hits?.value) {
+    $("#homeTableH").text(match_stats?.teams?.home?.stats?.hitting_hits?.value.total);
+    $("#awayTableH").text(match_stats?.teams?.away?.stats?.hitting_hits?.value.total);
     $("#homeTableE").text(
-      teams?.home?.stats?.fielding_errors_total?.value.total
+      match_stats?.teams?.home?.stats?.fielding_errors_total?.value.total
     );
     $("#awayTableE").text(
-      teams?.away?.stats?.fielding_errors_total?.value.total
+      match_stats?.teams?.away?.stats?.fielding_errors_total?.value.total
     );
   }
 
@@ -635,6 +634,24 @@ function setMatch() {
     $("#homeTable1").text(homeScore);
     $("#awayTable1").text(awayScore);
   }
+  // Batting or Pitching
+  if (match["livestate"]) {
+    if (match?.livestate?.batter?.team == "home") {
+      $("#homeRole").text("BATTER");
+      $("#awayRole").text("PITCHER");
+      curBat = "home";
+      curPit = "away";
+    }
+    if (match?.livestate?.batter?.team == "away") {
+      $("#awayRole").text("BATTER");
+      $("#homeRole").text("PITCHER");
+      curBat = "away";
+      curPit = "home";
+    }
+  }
+  // Name
+  if(match?.batter?.player?._id) $("#" + curBat + "Member").text(getName(match?.batter?.player?._id));
+  if(match?.pitcher?.player?._id) $("#" + curPit + "Member").text(getName(match?.pitcher?.player?._id));
   // Period Setting
   $("#period").text(match?.status?.name);
   if (match?.status?.name == "Ended") {
@@ -647,9 +664,21 @@ function setMatch() {
     $("#period").text("Ended");
     resetState();
   }
+  if (match?.livestate?.inning_half == "P") {
+    setCenterFrame("Middle of the inning", homeScore + " : " + awayScore);
+    resetState();
+    isMiddleOfTheInning = true
+  }
+  if (match?.livestate?.inning_half == "T") {
+    isMiddleOfTheInning = false
+  }
+  if (match?.livestate?.inning_half == "B") {
+    isMiddleOfTheInning = false
+  }
   if (match?.status?.name == "Break") {
     setCenterFrame("Break", homeScore + " : " + awayScore);
-    $("#period").text("Break");
+    if(innings) $("#period").text(order(innings));
+    else $("#period").text("Break");
     resetState();
   }
   if (match?.status?.name == "Not started") {
@@ -677,23 +706,13 @@ function setMatch() {
   } else if (match?.status) matchStartDate = null;
   if (match["p"] >= 31 && match["p"] <= 39) {
     setCenterFrame("End of inning", homeScore + " : " + awayScore);
-    $("#period").text(order(match["p"] % 10));
+    if(innings) $("#period").text(order(innings));
+    else $("#period").text("Break");
+    isMiddleOfTheInning = false;
     resetState();
   }
-  // Batting or Pitching
-  if (match["livestate"]) {
-    if (match?.livestate?.batter?.team == "home") {
-      $("#homeRole").text("BATTER");
-      $("#awayRole").text("PITCHER");
-      curBat = "home";
-      curPit = "away";
-    }
-    if (match?.livestate?.batter?.team == "away") {
-      $("#awayRole").text("BATTER");
-      $("#homeRole").text("PITCHER");
-      curBat = "away";
-      curPit = "home";
-    }
+  if (match?.p > 100) {
+    innings = match?.p % 100;
   }
 }
 
@@ -757,4 +776,6 @@ function resetState() {
   $("#roundBall").attr("fill-opacity", 0);
   $("#rectBallId1").text("");
   $("#rectBallId2").text("");
+  $("#homeMember").text("");
+  $("#awayMember").text("");
 }
