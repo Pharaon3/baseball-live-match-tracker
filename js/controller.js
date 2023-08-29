@@ -308,13 +308,18 @@ function stepInitialize() {
     if (cs["type"] == "gumbo_commentary") {
       console.log("commentary")
       if (cs?.commentary?.length > 40) {
-        $("#commentary_text").text(cs?.commentary?.substr(0, 38) + "...");
+        $("#commentary_text").text(cs?.commentary?.substr(0, 38));
+        $("#commentary_text1").text(cs?.commentary?.substr(39, cs?.commentary?.length - 1));
+        $("#commentary_rect").attr("height", 60);
       } else {
         $("#commentary_text").text(cs?.commentary);
+        $("#commentary_text1").text("");
+        $("#commentary_rect").attr("height", 30);
       }
       $("#commentary_rect").attr("fill-opacity", 0.5);
     } else {
       $("#commentary_text").text("");
+      $("#commentary_text1").text("");
       $("#commentary_rect").attr("fill-opacity", 0);
     }
     if (cs["type"] == "ball_in_play") {
