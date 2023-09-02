@@ -365,10 +365,12 @@ function stepInitialize() {
 function setBase(baseNumber, baseMember) {
   if (baseMember) {
     $("#base" + baseNumber).attr("fill-opacity", "0.8");
+    $("#base" + baseNumber).attr("fill", "#0f0");
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.8");
     $("#base" + baseNumber + "Member").text(baseMember);
   } else {
     $("#base" + baseNumber).attr("fill-opacity", "0.2");
+    $("#base" + baseNumber).attr("fill", "#fff");
     $("#base" + baseNumber + "Number").attr("fill-opacity", "0.5");
     $("#base" + baseNumber + "Member").text("-");
   }
