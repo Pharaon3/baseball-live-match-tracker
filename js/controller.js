@@ -337,6 +337,9 @@ function stepInitialize() {
       resetBattingState();
       currentBattNumber = 0;
     }
+    if (cs["type"] == "goal") {
+      setCenterFrame("RUN SCORED", teamNames[curBat])
+    }
   }
   if (cs?.batter?.playerid && getName(cs?.batter?.playerid)) {
     if (curBat == "home") {
@@ -375,21 +378,33 @@ function setBatterBall(ballCount) {
     $("#ball1").attr("fill-opacity", 0.2);
     $("#ball2").attr("fill-opacity", 0.2);
     $("#ball3").attr("fill-opacity", 0.2);
+    $("#ball1").attr("fill", "#fff");
+    $("#ball2").attr("fill", "#fff");
+    $("#ball3").attr("fill", "#fff");
   }
   if (ballCount == 1) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.2);
     $("#ball3").attr("fill-opacity", 0.2);
+    $("#ball1").attr("fill", "#0f0");
+    $("#ball2").attr("fill", "#fff");
+    $("#ball3").attr("fill", "#fff");
   }
   if (ballCount == 2) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.8);
     $("#ball3").attr("fill-opacity", 0.2);
+    $("#ball1").attr("fill", "#0f0");
+    $("#ball2").attr("fill", "#0f0");
+    $("#ball3").attr("fill", "#fff");
   }
   if (ballCount == 3) {
     $("#ball1").attr("fill-opacity", 0.8);
     $("#ball2").attr("fill-opacity", 0.8);
     $("#ball3").attr("fill-opacity", 0.8);
+    $("#ball1").attr("fill", "#0f0");
+    $("#ball2").attr("fill", "#0f0");
+    $("#ball3").attr("fill", "#0f0");
   }
 }
 function setBatterStrike(strikeCount) {
@@ -397,21 +412,33 @@ function setBatterStrike(strikeCount) {
     $("#strike1").attr("fill-opacity", 0.2);
     $("#strike2").attr("fill-opacity", 0.2);
     $("#strike3").attr("fill-opacity", 0.2);
+    $("#strike1").attr("fill", "#fff");
+    $("#strike2").attr("fill", "#fff");
+    $("#strike3").attr("fill", "#fff");
   }
   if (strikeCount == 1) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.2);
     $("#strike3").attr("fill-opacity", 0.2);
+    $("#strike1").attr("fill", "#ff0");
+    $("#strike2").attr("fill", "#fff");
+    $("#strike3").attr("fill", "#fff");
   }
   if (strikeCount == 2) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.8);
     $("#strike3").attr("fill-opacity", 0.2);
+    $("#strike1").attr("fill", "#ff0");
+    $("#strike2").attr("fill", "#ff0");
+    $("#strike3").attr("fill", "#fff");
   }
   if (strikeCount == 3) {
     $("#strike1").attr("fill-opacity", 0.8);
     $("#strike2").attr("fill-opacity", 0.8);
     $("#strike3").attr("fill-opacity", 0.8);
+    $("#strike1").attr("fill", "#ff0");
+    $("#strike2").attr("fill", "#ff0");
+    $("#strike3").attr("fill", "#ff0");
   }
 }
 function setBatterOuts(outCount) {
@@ -419,21 +446,33 @@ function setBatterOuts(outCount) {
     $("#outs1").attr("fill-opacity", 0.2);
     $("#outs2").attr("fill-opacity", 0.2);
     $("#outs3").attr("fill-opacity", 0.2);
+    $("#outs1").attr("fill", "#fff");
+    $("#outs2").attr("fill", "#fff");
+    $("#outs3").attr("fill", "#fff");
   }
   if (outCount == 1) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.2);
     $("#outs3").attr("fill-opacity", 0.2);
+    $("#outs1").attr("fill", "#f00");
+    $("#outs2").attr("fill", "#fff");
+    $("#outs3").attr("fill", "#fff");
   }
   if (outCount == 2) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.8);
     $("#outs3").attr("fill-opacity", 0.2);
+    $("#outs1").attr("fill", "#f00");
+    $("#outs2").attr("fill", "#f00");
+    $("#outs3").attr("fill", "#fff");
   }
   if (outCount == 3) {
     $("#outs1").attr("fill-opacity", 0.8);
     $("#outs2").attr("fill-opacity", 0.8);
     $("#outs3").attr("fill-opacity", 0.8);
+    $("#outs1").attr("fill", "#f00");
+    $("#outs2").attr("fill", "#f00");
+    $("#outs3").attr("fill", "#f00");
   }
 }
 function setBattingState() {
